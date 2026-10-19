@@ -77,9 +77,6 @@ function Register(){
                 
                 <div className="auth-header">
                     <h2 className="auth-title">Реєстрація</h2>
-                    <p className="auth-subtitle">
-                        Створіть акаунт, щоб зберігати фільми, писати відгуки та отримувати досягнення.
-                    </p>
                 </div>
 
                 <form onSubmit={handleRegister} className="auth-form">

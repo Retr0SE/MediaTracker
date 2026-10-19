@@ -56,9 +56,6 @@ function Login(){
                 
                 <div className="auth-header">
                     <h2 className="auth-title">Авторизація</h2>
-                    <p className="auth-subtitle">
-                        Увійдіть, щоб продовжити свою кіно-мандрівку та відстежувати улюблені тайтли.
-                    </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="auth-form">

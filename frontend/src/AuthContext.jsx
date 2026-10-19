@@ -3,21 +3,21 @@ import React, { createContext, useContext, useState} from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
-    const [token, setToken] = useState(localStorage.getItem('access_token'))
-    const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refresh_token'))
+    const [token, setToken] = useState(localStorage.getItem('access'))
+    const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refresh'))
 
 
     const login = (access, refresh) => {
         setToken(access)
         setRefreshToken(refresh)
-        localStorage.setItem('access_token', access)
-        localStorage.setItem('refresh_token', refresh)
+        localStorage.setItem('access', access)
+        localStorage.setItem('refresh', refresh)
         
     }
 
     const logout = () => {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('access')
+        localStorage.removeItem('refresh')
         setToken(null)
         setRefreshToken(null)
     };
@@ -41,7 +41,7 @@ export const AuthProvider = ({children}) => {
 
         if (response.status === 401 && refreshToken){
             try{
-                const refreshRes = await fetch(`{$API_URL}/api/token/refresh/`, {
+                const refreshRes = await fetch(`${API_URL}/api/token/refresh/`, {
                     method: 'POST',
                     headers: {
                         'Content-type': 'application/json'
@@ -54,7 +54,7 @@ export const AuthProvider = ({children}) => {
                     const data = await refreshRes.json()
 
                     setToken(data.access)
-                    localStorage.setItem('access_token', data.access)
+                    localStorage.setItem('access', data.access)
                     currentToken = data.access
 
                     response = await fetch(fullURL, {
