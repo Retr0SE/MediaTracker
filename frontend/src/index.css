@@ -1739,3 +1739,29 @@ input:focus {
     border-radius: 10px;
     margin-top: auto;
 }
+
+
+.not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+}
+
+.not-found-title {
+    font-size: 120px;
+    margin: 0;
+    /* Той самий градієнт для сучасного вигляду */
+    background: linear-gradient(135deg, #ff4d4f, #ff7875);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.not-found-text {
+    color: var(--text-muted); /* Використовуємо твою змінну */
+    font-size: 1.2rem;
+    margin-bottom: 32px;
+    max-width: 500px;
+}

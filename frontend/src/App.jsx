@@ -7,6 +7,7 @@ import Register from './pages/auth/Register'
 import Profile from './pages/Profile'
 import Header from './pages/Header'
 import Landing from './pages/Landing'
+import NotFound from './pages/NotFound'
 
 function App() {
 
@@ -24,6 +25,8 @@ function App() {
         <Route path='/list' element={isAuthenticated ? <Home/> : <Navigate to='/login' replace />} />
         <Route path='/media/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/login' replace />} />
         <Route path='/profile' element={isAuthenticated ? <Profile/> : <Navigate to='/login' replace />} />
+
+        <Route path='*' element={<NotFound />}/>
       </Routes>
     </>
   ) 

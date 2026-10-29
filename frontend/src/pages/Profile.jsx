@@ -6,7 +6,7 @@ export default function Profile() {
     const [loading, setLoading] = useState(true)
     const [userData, setUserData] = useState(null)
 
-    const { authFetch } = useAuth()
+    const {token, authFetch} = useAuth()
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -23,35 +23,33 @@ export default function Profile() {
     }
 
     const handleFileChange = async (event) => {
-        const file = event.target.files[0]
-        if (!file) return
+    const file = event.target.files[0]
+    if (!file) return
 
-        const formData = new FormData()
-        formData.append('avatar', file)
+    const formData = new FormData()
+    formData.append('avatar', file)
 
-        try{
-            const token = localStorage.getItem('access_token')
+    try {
+        const response = await fetch(`${API_URL}/api/users/profile/`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization' : `Bearer ${token}`
+            },
+            body: formData,
+        })
 
-            const response = await fetch(`${API_URL}/api/users/profile/`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization' : `Bearer ${token}`
-                },
-                body: formData,
-            })
-
-            if (response.ok){
-                const updatedUser = await response.json()
-                setUserData(prev => ({...prev, avatar: updatedUser.avatar}))
-
-            } else {
-                const errorData = await response.json()
-                console.error('Не вдалося оновити автарку', errorData)
-            }
-        } catch (error){
-            console.error('Помилка завантаження файлу:', error)
+        if (response.ok) {
+            const updatedUser = await response.json()
+            setUserData(prev => ({...prev, avatar: updatedUser.avatar}))
+            console.log('Аватарку успішно оновлено!')
+        } else {
+            const errorData = await response.json()
+            console.error('Не вдалося оновити аватарку', errorData)
         }
+    } catch (error) {
+        console.error('Помилка завантаження файлу:', error)
     }
+}
 
     useEffect(() => {
         const fetchMyList = async () => {
