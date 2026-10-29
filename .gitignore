@@ -1,9 +1,22 @@
+# --- Environment / Secrets ---
 .env
+.env.*
+!.env.example
 
-venv/
-env/
-
-__pycache__/
+# --- Backend (Django / Python) ---
+backend/venv/
+backend/__pycache__/
+backend/media/
 *.pyc
+*.pyo
+*.sqlite3
 
-media/
+# --- Frontend (React / Node) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+
+# --- OS / IDE ---
+.DS_Store
+.vscode/
+.idea/
