@@ -41,10 +41,26 @@ function Login(){
                 login(data.access, data.refresh)
                 navigate('/')
             } else {
-                showToast('Неправильний логін або пароль', 'error')
+                if (response === 401){
+                    showToast('Неправильний логін або пароль', 'error')
+                }
+                else if (response === 400){
+                    const errorMsg = data.detail || data.non_field_errors?.[0] || "Помилка валідації даних"
+                    showToast(errorMsg, 'error')
+                }
+                else if (response === 429){
+                    showToast('Забагато спроб входу. Зачекайте хвилинку', 'error')
+                }
+                else if (response === 500){
+                    showToast('Проблеми на сервері. Спробуйте пізніше', 'error')
+                }
+                else{
+                    showToast(data.detail || "Щось пішло не так", "error")
+                }
             }
         } catch (error) {
-            showToast("Помилка з'єднання з сервером", 'error')
+            console.error("Помилка авторизації:", error)
+            showToast("Сервер недоступний. Перевірте з'єднання", 'error')
         } finally {
             setIsLoading(false)
         }

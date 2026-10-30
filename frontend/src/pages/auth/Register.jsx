@@ -38,14 +38,37 @@ function Register(){
             const data = await response.json()
 
             if (!response.ok){
-                showToast(
-                    typeof data.error === 'string'
-                    ? data.error
-                    : JSON.stringify(data),
-                    'error'
-                )
-                return
+                if (response.status === 400) {
+                let errorMessage = 'Помилка перевірки даних';
+                
+                // Аналізуємо, в якому полі сталася помилка, і перекладаємо
+                if (data.username) {
+                    errorMessage = data.username[0].includes('exists') 
+                        ? 'Користувач з таким логіном вже існує' 
+                        : 'Недопустимі символи в логіні';
+                } else if (data.email) {
+                    errorMessage = data.email[0].includes('exists') 
+                        ? 'Цей email вже зареєстровано' 
+                        : 'Некоректний формат email';
+                } else if (data.password) {
+                    errorMessage = 'Пароль надто короткий або поширений';
+                } else if (data.error) {
+                    errorMessage = data.error; 
+                } else if (data.detail) {
+                    errorMessage = 'Помилка доступу. Перевірте дані';
+                }
+                
+                
+                showToast(errorMessage, 'error')
+            } else if (response.status === 429) {
+                showToast('Забагато спроб. Зачекайте хвилину', 'error')
+            } else if (response.status >= 500) {
+                showToast('Помилка сервера. Спробуйте пізніше', 'error')
+            } else {
+                showToast('Не вдалося створити акаунт', 'error')
             }
+            return
+        }
         
             const loginResponse = await fetch(`${API_URL}/api/token/`, {
                 method: 'POST',
@@ -64,8 +87,8 @@ function Register(){
                 navigate('/login')
             }
 
-        } catch {
-            showToast("Помилка з'єднання з сервером", 'error')
+        } catch (error) {
+            showToast("Сервер недоступний. Перевірте з'єднання", 'error')
         } finally {
             setIsLoading(false)
         }

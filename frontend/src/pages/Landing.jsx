@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import Footer from '../components/Footer';
 
 const MOVIE_LIST = [
-    { id: 1, title: 'Dune: Part Two', year: '2024', genre: 'Фантастика', status: 'Переглянуто', statusClass: 'watched', img: '/dune.jpg' },
+    { id: 1, title: 'Dune: Part One', year: '2021', genre: 'Фантастика', status: 'Переглянуто', statusClass: 'watched', img: '/dune.jpg' },
     { id: 2, title: 'The Batman', year: '2022', genre: 'Бойовик', status: 'У планах', statusClass: 'planned', img: '/batman.jpg' },
     { id: 3, title: 'Spider-Man', year: '2021', genre: 'Пригоди', status: 'Дивлюсь', statusClass: 'watching', img: '/spiderman.jpg' }
 ];
@@ -73,7 +73,7 @@ export default function Landing() {
                                     <Link to="/list" className="ml-button">Відкрити медіатеку <span>↗</span></Link>
                                 ) : (
                                     <>
-                                        <Link to="/register" className="ml-button">Створити акаунт <span>↗</span></Link>
+                                        <Link to="/register" className="ml-button">Створити акаунт</Link>
                                         <Link to="/login" className="ml-login">Вже є акаунт?</Link>
                                     </>
                                 )}
@@ -86,10 +86,6 @@ export default function Landing() {
                         </div>
 
                         <div className="ml-hero-art ml-reveal">
-                            <div className="ml-art-heading">
-                                <span>ВИБРАНЕ З КОЛЕКЦІЇ</span>
-                                <span>№ 001 — 003</span>
-                            </div>
                             <div className="ml-poster-stage">
                                 <div className="ml-poster ml-poster-back">
                                     <img src="/batman.jpg" alt="The Batman" />

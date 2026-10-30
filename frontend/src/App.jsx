@@ -27,9 +27,9 @@ function App() {
         <Route path='/register' element={!isAuthenticated ? <Register /> : <Navigate to='/list' replace />} />
 
         <Route path='/' element={!isAuthenticated ? <Landing/> : <Navigate to='/list' replace />} />
-        <Route path='/list' element={isAuthenticated ? <Home/> : <Navigate to='/login' replace />} />
-        <Route path='/media/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/login' replace />} />
-        <Route path='/profile' element={isAuthenticated ? <Profile/> : <Navigate to='/login' replace />} />
+        <Route path='/list' element={isAuthenticated ? <Home/> : <Navigate to='/' replace />} />
+        <Route path='/media/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/' replace />} />
+        <Route path='/profile' element={isAuthenticated ? <Profile/> : <Navigate to='/' replace />} />
 
         <Route path='*' element={<NotFound />}/>
       </Routes>
