@@ -1,21 +1,26 @@
 import { useAuth } from './AuthContext'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import MediaDetails from './pages/MediaDetails'
 import Home from './pages/Home'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import Profile from './pages/Profile'
-import Header from './pages/Header'
+import Header from './components/Header'
 import Landing from './pages/Landing'
 import NotFound from './pages/NotFound'
 
 function App() {
 
   const {isAuthenticated} = useAuth()
+  const location = useLocation()
+
+  const isAuthPath = location.pathname === "/login" || location.pathname === "/register"
+
+  const showHeader = isAuthenticated || isAuthPath
 
   return (
     <>
-      {isAuthenticated && <Header/>}
+      {showHeader && <Header isSimple={isAuthPath}/>}
 
       <Routes>
         <Route path='/login' element={!isAuthenticated ? <Login/> : <Navigate to='/list' replace />} />

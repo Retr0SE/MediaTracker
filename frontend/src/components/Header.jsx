@@ -1,13 +1,13 @@
 import { useAuth } from '../AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 
-export default function Header(){
+export default function Header({ isSimple = false}){
     const navigate = useNavigate()
     const { logout } = useAuth()
 
     const handleLogout = () => {
         logout()
-        navigate('/login')
+        navigate('/', {replace: true})
     }
 
     return (
@@ -15,11 +15,12 @@ export default function Header(){
             
             {/* ЛІВА ЧАСТИНА: Логотип */}
             <Link to="/" className="header-logo">
-                Tracker
+                MediaTracker
             </Link>
             
 
             {/* ПРАВА ЧАСТИНА: Кнопки */}
+            {!isSimple && (
             <div className="header-nav">
 
                 <Link to="/list" className="btn-nav btn-nav-primary">
@@ -35,6 +36,7 @@ export default function Header(){
                 </button>
 
             </div>
+            )}
         </header>
     )
 }
