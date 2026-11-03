@@ -652,6 +652,112 @@ input:focus {
   padding: 40px 20px;
 }
 
+/* === SVG КРУГОВА ДІАГРАМА (DONUT CHART) === */
+.chart-container {
+    padding: 30px;
+    margin-bottom: 40px;
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: white;
+}
+
+.donut-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+/* Обгортка для кола */
+.donut-wrapper {
+    position: relative;
+    width: 180px;
+    height: 180px;
+}
+
+.donut-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); /* Повертаємо, щоб відлік йшов від 12 годин */
+    filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.5));
+}
+
+/* Фонове кільце-трек */
+.donut-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 12;
+}
+
+/* Кольорові сегменти */
+.donut-segment {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round; /* Робить кінці капсул закругленими! */
+    transition: stroke-width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+    cursor: pointer;
+}
+
+.donut-segment:hover {
+    stroke-width: 16; /* Кільце потовщується при наведенні миші */
+    filter: brightness(1.3);
+}
+
+/* Текст по центру кола */
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.donut-center-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: white;
+    line-height: 1.1;
+}
+
+.donut-center-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Легенда збоку колонкою */
+.donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 150px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.legend-item:hover {
+    color: white;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
 /* === ДИНАМІЧНА ШАПКА === */
 .profile-header-card {
     position: relative;
@@ -683,6 +789,36 @@ input:focus {
     flex: 1;
     object-fit: cover;
     height: 100%;
+}
+
+/* === ПРЕМІАЛЬНИЙ СТРИМАНИЙ ЕФЕКТ === */
+.header-logo-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0.9;
+}
+
+.header-logo:hover .header-logo-icon {
+    opacity: 1;
+    transform: translateY(-2px);
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.4));
+}
+
+.header-logo:active .header-logo-icon {
+    transform: translateY(1px) scale(0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.header-logo-text {
+    transition: color 0.3s ease, letter-spacing 0.3s ease;
+    color: var(--text-muted, white); 
+}
+
+.header-logo:hover .header-logo-text {
+    color: white;
+    letter-spacing: 1px; 
 }
 
 /* === АВАТАРКА КОРИСТУВАЧА === */

@@ -4,7 +4,7 @@ import { useToast } from '../ToastContext'
 
 export default function Header({ isSimple = false}){
     const { logout } = useAuth()
-    const { navigate } = useNavigate()
+    const navigate = useNavigate()
     const { showToast } = useToast()
 
     const handleLogout = () => {
@@ -16,16 +16,13 @@ export default function Header({ isSimple = false}){
     return (
         <header className="app-header">
             
-            {/* ЛІВА ЧАСТИНА: Логотип */}
+            {/* ЛІВА ЧАСТИНА: Логотип з іконкою */}
             <Link to="/" className="header-logo">
-                KINEMIO
+                <span className="header-logo-text">KINEMIO</span>
             </Link>
             
-
-            {/* ПРАВА ЧАСТИНА: Кнопки */}
             {!isSimple && (
             <div className="header-nav">
-
                 <Link to="/list" className="btn-nav btn-nav-primary">
                     Мій список
                 </Link>
@@ -37,7 +34,6 @@ export default function Header({ isSimple = false}){
                 <button onClick={handleLogout} className="btn-nav btn-nav-primary">
                     Вихід
                 </button>
-
             </div>
             )}
         </header>

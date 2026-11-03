@@ -174,6 +174,19 @@ export default function Profile() {
         return year && year >= currentYear - 1
     }).length
 
+    const totalItems = mediaList.length
+    const totalCompleted = completedItems.length
+
+    const inProgressCount = mediaList.filter(item => item.status === "in_progress")
+
+    const totalMinutes = completedItems.reduce((acc, item) => {
+        const media = item.media_item || item.media
+        const durationStr = String(media?.duration || "0").replace(/\D/g, '')
+        return acc + (parseInt(durationStr, 10) || 0)
+    }, 0)
+    const totalHours = Math.floor(totalMinutes / 60)
+    const totalDays = (totalHours / 24).toFixed(1)
+
     const achievements = [
         {
             id: 'retro',
@@ -247,6 +260,53 @@ export default function Profile() {
         }
     ];
 
+    
+    // === ДАНІ ДЛЯ КРУГОВОЇ ДІАГРАМИ (АНАЛІТИКА ЖАНРІВ) ===
+    const radius = 42;
+    const circumference = 2 * Math.PI * radius;
+    
+    // 1. Рахуємо частоту кожного жанру у списку користувача
+    const genreCounts = {};
+    mediaList.forEach(item => {
+        const genresStr = (item.media_item || item.media)?.genre || "";
+        if (genresStr && genresStr !== "N/A") {
+            genresStr.split(',').forEach(g => {
+                const genre = g.trim();
+                if (genre) genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+            });
+        }
+    });
+
+    const sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]);
+
+    const topGenres = sortedGenres.slice(0, 4);
+
+    // 4. Решту групуємо в категорію "Інше"
+    const otherGenresCount = sortedGenres.slice(4).reduce((acc, curr) => acc + curr[1], 0);
+
+    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']; // Фіолетовий, Синій, Зелений, Жовтий
+
+    const chartData = topGenres.map(([name, count], index) => ({
+        id: name,
+        label: name,
+        value: count,
+        color: colors[index]
+    }));
+
+    if (otherGenresCount > 0) {
+        chartData.push({
+            id: 'other',
+            label: 'Інше',
+            value: otherGenresCount,
+            color: '#4b5563' // Приглушений сірий для всіх інших жанрів
+        });
+    }
+
+    const totalGenreTags = chartData.reduce((acc, item) => acc + item.value, 0);
+
+    let cumulativePercent = 0;
+
+
     return (
         <div className="profile-wrapper">
             <div className="profile-dashboard app-container" style={{ position: 'relative', zIndex: 1 }}>
@@ -291,6 +351,71 @@ export default function Profile() {
                     <h2 style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Аналізуємо ваш профіль...</h2>
                 ) : (
                     <>
+                   {/* === КРУГОВА ДІАГРАМА (ЖАНРИ) === */}
+                        {totalGenreTags > 0 && (
+                            <div className="chart-container glass-card">
+                                <h3 className="chart-title">Аналітика жанрів</h3>
+                                
+                                <div className="donut-layout">
+                                    <div className="donut-wrapper">
+                                        <svg viewBox="0 0 100 100" className="donut-svg">
+                                            <circle cx="50" cy="50" r={radius} className="donut-bg" />
+                                            
+                                            {chartData.map((item) => {
+                                                const percent = item.value / totalGenreTags;
+                                                const strokeLength = percent * circumference;
+                                                const offset = cumulativePercent * circumference;
+                                                cumulativePercent += percent;
+                                                
+                                                const renderLength = strokeLength > 3 ? strokeLength - 3 : strokeLength;
+
+                                                return (
+                                                    <circle
+                                                        key={item.id}
+                                                        cx="50"
+                                                        cy="50"
+                                                        r={radius}
+                                                        className="donut-segment"
+                                                        stroke={item.color}
+                                                        strokeDasharray={`${renderLength} ${circumference}`}
+                                                        strokeDashoffset={-offset}
+                                                        title={`${item.label}: ${item.value}`}
+                                                    />
+                                                );
+                                            })}
+                                        </svg>
+                                        
+                                        {/* У центрі виводимо улюблений жанр */}
+                                        <div className="donut-center">
+                                            <span className="donut-center-value" style={{fontSize: chartData[0]?.label.length > 8 ? '1.2rem' : '1.5rem', color: chartData[0]?.color}}>
+                                                {chartData[0]?.label || '-'}
+                                            </span>
+                                            <span className="donut-center-label">Топ Жанр</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="donut-legend">
+                                        {chartData.map(item => (
+                                            <div key={item.id} className="legend-item">
+                                                <span 
+                                                    className="legend-dot" 
+                                                    style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}` }}
+                                                ></span>
+                                                <div style={{display: 'flex', flexDirection: 'column'}}>
+                                                    <span>{item.label}</span>
+                                                    <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>
+                                                        {item.value} тайтлів
+                                                    </span>
+                                                </div>
+                                                <strong style={{ color: 'white', marginLeft: 'auto', paddingLeft: '24px', fontSize: '1.1rem' }}>
+                                                    {Math.round((item.value / totalGenreTags) * 100)}%
+                                                </strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* СЕКЦІЯ 1: ДОСЯГНЕННЯ */}
                         <h2 className="section-title">Нагороди профілю</h2>
                         <div className="achievements-grid">
