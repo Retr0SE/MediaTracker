@@ -3,11 +3,13 @@ from .models import CustomUser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import RegisterSerializer, UserProfileSerializer
+from django.core.cache import cache
+from rest_framework.response import Response
 # Create your views here.
 
 class RegisterAPIView(generics.CreateAPIView):
     queryset= CustomUser.objects.all()
-    pagination_classes = (AllowAny)
+    permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
 
@@ -19,3 +21,23 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+    def retrieve(self, request, *args, **kwargs):
+        cache_key = f"user_profile_{request.user.id}"
+        cached_profile = cache.get(cache_key)
+
+        if cached_profile:
+            print("⚡ REDIS: Профіль віддано з пам'яті!")
+            return Response(cached_profile)
+
+        print("🐢 PostgreSQL: Беремо профіль з бази...")
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=3600)
+        return response
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        cache_key = f"user_profile_{request.user.id}"
+        cache.delete(cache_key)
+        print("🗑️ REDIS: Старий кеш профілю очищено!")
+        return response

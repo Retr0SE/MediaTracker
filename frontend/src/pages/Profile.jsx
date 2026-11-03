@@ -84,10 +84,16 @@ export default function Profile() {
     const masterpieces = ratedItems.filter(item => item.score === 10).slice(0, 5)
 
     let oldestMedia = null
+    let minYear = 9999
+
     let longestMedia = null
-    let worstMedia = null
+    let maxDuration = 0
+
     let epicSeries = null
+    let maxSeasons = 0
+
     let topImdbMedia = null
+    let maxImdbRating = 0
 
     completedItems.forEach(item => {
         const media = item.media_item || item.media;
@@ -95,34 +101,38 @@ export default function Profile() {
 
         const year = parseInt(media.release_year, 10)
         if (!isNaN(year)){
-            const currentOldestYear = oldestMedia ? parseInt((oldestMedia.media_item || oldestMedia.media).release_year, 10): 9999
-            if (year < currentOldestYear) oldestMedia = item
+            minYear = year
+            oldestMedia = item
         }
 
-        const durationInt = parseInt(String(media.duration || "0").replace(/\D/g, ''), 10)
-        if (!isNaN(durationInt) && durationInt > 0){
-            const currentLongestMedia = longestMedia ? parseInt(String((longestMedia.media_item || longestMedia.media).duration || "0").replace(/\D/g, ''), 10) : 0
-            if(durationInt > currentLongestMedia) longestMedia = item
+        const durationStr = String(media.duration || "0").replace(/\D/g, '')
+        const durationInt = parseInt(durationStr, 10)
+        if (!isNaN(durationInt) && durationInt > maxDuration){
+            maxDuration = durationInt
+            longestMedia = item
         }
 
         if (media.media_type === "series"){
-            const seasonsInt = parseInt(String(media.total_seasons || media.seasons || "1").replace(/\D/g, ''), 10)
-            const currentMaxSeasons = epicSeries ? parseInt(String((epicSeries.media_item || epicSeries.media).total_seasons || (epicSeries.media_item || epicSeries.media).seasons || "1").replace(/\D/g, ''), 10) : 0
-            if (seasonsInt >= currentMaxSeasons){
+            const seasonsStr = String(media.total_seasons || media.seasons || "1").replace(/\D/g, '')
+            const seasonsInt = parseInt(seasonsStr, 10)
+            if (!isNaN(seasonsInt) && seasonsInt > maxSeasons){
+                maxSeasons = seasonsInt
                 epicSeries = item
             }
         }
 
         const imdbRating = parseFloat(media.imdb_rating || "0")
-        const currentTopImdb = topImdbMedia ? parseFloat((topImdbMedia.media_item || topImdbMedia.media).imdbRating || "0"): 0
-        if (imdbRating > currentTopImdb){
+        if (!isNaN(imdbRating) && imdbRating > maxImdbRating){
+            maxImdbRating = imdbRating
             topImdbMedia = item
         }
 
     })
-
+    let worstMedia = null
     ratedItems.forEach(item => {
-        if(!worstMedia || item.score < worstMedia.score) worstMedia = item
+        if(!worstMedia || item.score < worstMedia.score){ 
+            worstMedia = item
+        }
     })
 
     const currentYear = new Date().getFullYear()

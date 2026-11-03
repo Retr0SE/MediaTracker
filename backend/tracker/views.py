@@ -7,8 +7,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
 import requests
-
 from rest_framework.decorators import api_view, permission_classes
+from django.core.cache import cache
 
 
 # Create your views here.
@@ -20,6 +20,19 @@ class UserMediaAPIList(generics.ListAPIView):
     def get_queryset(self):
         return UserMedia.objects.filter(user=self.request.user).select_related('media_item').all()
 
+    def list(self, request, *args, **kwargs):
+        cache_key = f'user_media_list_{request.user.id}'
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            print('⚡ ШВИДКІСТЬ: Віддаємо дані з Redis!')
+            return Response(cached_data)
+        print('🐢 ПОВІЛЬНО: Робимо запит до PostgreSQL...')
+
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        cache.set(cache_key, serializer.data, timeout=900)
+
+        return Response(serializer.data)
 
 class AddMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -27,19 +40,33 @@ class AddMediaAPIView(APIView):
     def post(self, request):
         title = request.data.get('title')
         media_type = request.data.get('media_type', 'movie')
+        imdb_id = request.data.get('imdb_id')
 
         if not title:
-            return Response({'error': "Назва обов'язкова"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "Назва або ID обов'язкові"}, status=status.HTTP_400_BAD_REQUEST)
 
-        media_data = fetch_omdb_info(title, media_type)
+        media_data = fetch_omdb_info(title, media_type, imdb_id)
 
         if media_data:
-            media_item, _ = MediaItem.objects.get_or_create(
-                title = title,
-                media_type = media_type,
-                defaults=media_data
-            )
-        
+            exact_title = media_data.pop('title', title)
+            exact_imdb_id = media_data.pop('imdb_id', imdb_id)
+
+            if exact_imdb_id:
+                media_item, _= MediaItem.objects.get_or_create(
+                    imdb_id = exact_imdb_id,
+                    defaults={
+                        'title': title,
+                        'media_type': media_type,
+                        **media_data
+                    }
+                )
+            else:
+                media_item, _= MediaItem.objects.get_or_create(
+                    title=exact_title,
+                    media_type=media_type,
+                    defaults=media_data,
+                )
+
             user_media, created = UserMedia.objects.get_or_create(
                 user = request.user,
                 media_item = media_item,
@@ -47,6 +74,7 @@ class AddMediaAPIView(APIView):
             )
 
             if created:
+                cache.delete(f'user_media_list_{request.user.id}')
                 return Response({'message': "Фільм успішно додано!"}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'message': "Цей фільм вже є у вашому списку."}, status=status.HTTP_200_OK)
@@ -61,6 +89,7 @@ class DeleteMediaAPIView(APIView):
         try:
             media_to_delete = UserMedia.objects.get(id=pk, user=request.user)
             media_to_delete.delete()
+            cache.delete(f'user_media_list_{request.user.id}')
             return Response({'message': 'Фільм видалено'}, status=status.HTTP_204_NO_CONTENT)
         except UserMedia.DoesNotExist:
             return Response({'error': 'Фільм не знайдено'}, status=status.HTTP_404_NOT_FOUND)
@@ -109,7 +138,9 @@ class UpdateMediaAPIView(APIView):
                 user_media.review = request.data.get('review')  
 
             user_media.save()
+            cache.delete(f'user_media_list_{request.user.id}')
             return Response({'message': 'Успішно оновлено!'})
         except UserMedia.DoesNotExist:
             return Response({'message': 'Фільм не знайдено'}, status=status.HTTP_404_NOT_FOUND)
+
 

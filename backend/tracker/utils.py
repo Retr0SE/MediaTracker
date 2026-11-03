@@ -1,7 +1,16 @@
 import requests
 from django.conf import settings
+from django.core.cache import cache
 
-def fetch_omdb_info(title, media_type):
+def fetch_omdb_info(title, media_type, imdb_id=None):
+    cache_key = f"omdb_{imdb_id}" if imdb_id else f"omdb_{title.replace(' ', '_')}_{media_type}"
+    cached_movie = cache.get(cache_key)
+    if cached_movie:
+        print(f"⚡ REDIS: Фільм {cache_key} віддано з пам'яті!")
+        return cached_movie
+
+    print(f"🐢 OMDB API: Робимо реальний запит в інтернет...")
+
     if media_type == 'movie':
         omdb_type = 'movie'
     elif media_type in ['series', 'anime']:
@@ -13,11 +22,15 @@ def fetch_omdb_info(title, media_type):
     url = "http://www.omdbapi.com/"
     params = {
         'apikey': settings.OMDB_API_KEY,
-        't': title,
         'type': omdb_type,
         'plot': 'full'
 
     }
+
+    if imdb_id:
+        params['i'] = imdb_id
+    else:
+        params['t'] = title
 
     try:
         response = requests.get(url, params=params)
@@ -70,7 +83,9 @@ def fetch_omdb_info(title, media_type):
                 language = language_str if language_str != "N/A" else None
                 
 
-                return {
+                result_data = {
+                    'title': data.get('Title'),
+                    'imdb_id': data.get('imdbID'),
                     'poster_url': poster_url,
                     'release_year': year,
                     'description': description,
@@ -84,6 +99,9 @@ def fetch_omdb_info(title, media_type):
                     'country': country,
                     'language': language,
                 }
+                
+            cache.set(cache_key, result_data, timeout=2592000)
+            return result_data
     except Exception as e:
         print(f'Помилка OMDb: {e}')
     return {}

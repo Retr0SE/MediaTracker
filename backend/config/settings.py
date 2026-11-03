@@ -21,7 +21,7 @@ env = environ.Env(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env.read_env(BASE_DIR.parent / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -148,7 +148,7 @@ LOGOUT_REDIRECT_URL = "login"
 LOGIN_URL = "login"
 
 
-OMDB_API_KEY = '3b1ec736'
+OMDB_API_KEY = env("OMDB_API_KEY")
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     'http://localhost:5173'
@@ -168,4 +168,17 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True
 }
+
+CACHES= {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS":{
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 

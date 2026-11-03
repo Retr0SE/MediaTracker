@@ -45,6 +45,7 @@ h1 {
   font-weight: 700;
   margin: 0;
   background: linear-gradient(90deg, #ffffff, #a1a1aa);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
@@ -221,7 +222,7 @@ input:focus {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0 !important; /* Важливо: прибираємо паддінги, щоб постер був на всю ширину зверху */
+    padding: 0 !important; 
     border-radius: 16px;
     background-color: var(--card-bg); /* Запасний фон, якщо скло не спрацює */
     border: 1px solid var(--border-light);
@@ -288,6 +289,7 @@ input:focus {
     margin: 0 0 12px 0;
     line-height: 1.3;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2; /* Обрізає до 2 рядків */
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -543,31 +545,89 @@ input:focus {
     transform: translateY(-2px) rotate(90deg); /* Крута мікроанімація обертання хрестика */
 }
 
-/* === СПЛИВАЮЧІ ПОВІДОМЛЕННЯ (TOASTS) === */
+/* === ПРЕМІУМ СПЛИВАЮЧІ ПОВІДОМЛЕННЯ (АБСОЛЮТНИЙ МІНІМАЛІЗМ) === */
 .toast-container {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 9999;
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .toast {
-  background: var(--card-bg);
-  color: var(--text-main);
-  padding: 16px 24px;
-  border-radius: 12px;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  font-weight: 500;
-  font-size: 1rem;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  display: flex;
-  align-items: center;
+    position: relative;
+    background: rgba(15, 20, 25, 0.85); /* Темне скло */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    overflow: hidden; 
+    
+    animation: toastInOut 3.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.toast.error { border-left: 4px solid var(--danger); }
-.toast.success { border-left: 4px solid var(--success); }
+/* Прогрес-бар знизу (тепер він бере на себе основний акцент) */
+.toast::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    animation: progressShrink 3.4s linear forwards;
+}
 
+/* --- СТИЛЬ: ПОМИЛКА --- */
+.toast.error {
+    /* Кольорова рамка та легке червоне світіння навколо всього блоку */
+    border: 1px solid rgba(248, 81, 73, 0.4);
+    box-shadow: 0 8px 30px rgba(248, 81, 73, 0.15);
+}
+.toast.error::after {
+    background-color: #f85149;
+    box-shadow: 0 0 10px #f85149;
+}
+
+/* --- СТИЛЬ: УСПІХ --- */
+.toast.success {
+    /* Кольорова рамка та легке зелене світіння навколо всього блоку */
+    border: 1px solid rgba(46, 160, 67, 0.4);
+    box-shadow: 0 8px 30px rgba(46, 160, 67, 0.15);
+}
+.toast.success::after {
+    background-color: #2ea043;
+    box-shadow: 0 0 10px #2ea043;
+}
+
+/* --- КЛЮЧОВІ КАДРИ --- */
+@keyframes toastInOut {
+    0% {
+        opacity: 0;
+        transform: translateX(120%) scale(0.9);
+    }
+    10% { 
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    85% { 
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateX(120%) scale(0.9);
+    }
+}
+
+@keyframes progressShrink {
+    0% { width: 100%; }
+    100% { width: 0%; }
+}
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -1538,6 +1598,7 @@ input:focus {
 }
 .ml-hero-copy h1 span {
     background: linear-gradient(120deg, var(--ml-blue), var(--ml-purple));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -2107,6 +2168,7 @@ input:focus {
     margin: 0;
     /* Той самий градієнт для сучасного вигляду */
     background: linear-gradient(135deg, #ff4d4f, #ff7875);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

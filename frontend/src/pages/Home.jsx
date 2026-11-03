@@ -53,10 +53,12 @@ function Home(){
   }, [searchQuery, authFetch])
 
   // === ДОДАВАННЯ З ПОШУКУ ===
-  const handleSelectAndAdd = async (title, type) => {
+  const handleSelectAndAdd = async (title, type, imdbID) => {
     setShowDropdown(false)
     setSearchQuery('')
     setIsLoading(true)
+
+    console.log("Відправляємо на бекенд:", { title, type, imdb_id: imdbID });
 
     try {
       const response = await authFetch('/api/media/add/', {
@@ -64,7 +66,7 @@ function Home(){
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title: title, media_type: type === 'series' ? 'series' : 'movie' })
+        body: JSON.stringify({ title: title, media_type: type === 'series' ? 'series' : 'movie', imdb_id: imdbID })
       })
 
       const data = await response.json()
@@ -251,7 +253,7 @@ function Home(){
                 <div 
                   key={item.imdbID}
                   className="search-item"
-                  onClick={() => handleSelectAndAdd(item.Title, item.Type)}>
+                  onClick={() => handleSelectAndAdd(item.Title, item.Type, item.imdbID)}>
                   <img 
                     src={item.Poster !== 'N/A' ? item.Poster : 'https://placehold.co/40x60?text=No+Img'} 
                     alt="poster" 

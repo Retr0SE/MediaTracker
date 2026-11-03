@@ -15,6 +15,7 @@ class MediaItem(models.Model):
     title = models.CharField(max_length=255, verbose_name='Назва')
     media_type = models.CharField(max_length=20, choices=MEDIA_TYPES, verbose_name='Тип контенту')
     genre = models.CharField(max_length=255, blank=True, null=True, verbose_name="Жанр")
+    imdb_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
     imdb_rating = models.CharField(max_length=10, blank=True, null=True, verbose_name='Рейтинг IMDb')
     description = models.CharField(blank=True, null=True, verbose_name='Опис')
     release_year = models.IntegerField(blank=True, null=True, verbose_name='Рік випуску')
