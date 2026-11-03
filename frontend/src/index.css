@@ -34,9 +34,11 @@ body {
 }
 
 .app-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
 /* === СУЧАСНА ТИПОГРАФІКА === */
@@ -384,7 +386,7 @@ input:focus {
 .home-wrapper::before,
 .home-wrapper::after {
     content: '';
-    position: fixed; /* Fixed, щоб плями стояли на місці, коли гортаєш список */
+    position: fixed;
     border-radius: 50%;
     filter: blur(120px);
     z-index: 0;
@@ -2244,4 +2246,38 @@ input:focus {
     border-top: 1px solid #30363d;
     color: var(--text-muted, #8b949e);
     font-size: 0.9rem;
+}
+
+/* =========================================
+   CUSTOM SCROLLBAR (Dark Theme & Glass)
+   ========================================= */
+
+/* Для Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Для Chrome, Edge, Safari та Opera */
+::-webkit-scrollbar {
+    width: 8px;  /* Вертикальний скрол */
+    height: 8px; /* Горизонтальний скрол */
+}
+
+/* Фон скролбара (трек) */
+::-webkit-scrollbar-track {
+    background: transparent; /* Прозорий фон, щоб не перекривати твій дизайн */
+    border-radius: 10px;
+}
+
+/* Сам бігунок (thumb) */
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15); /* Напівпрозорий ефект скла */
+    border-radius: 10px; /* Закруглені краї */
+    transition: background 0.3s ease;
+}
+
+/* Бігунок при наведенні миші (hover) */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3); /* Стає світлішим для зворотного зв'язку */
 }

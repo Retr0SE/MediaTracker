@@ -112,12 +112,13 @@ function MediaDetails(){
     const hasReview = Boolean(currentItem.review && currentItem.review.trim() !== "")
 
     return (
-        <div className="app-container">
-            <button className="btn-back" onClick={() => navigate('/')}>
-                ← Назад до списку
-            </button>
+        <div className="home-wrapper">
+            <div className="app-container">
+                <button className="btn-back" onClick={() => navigate('/')}>
+                Назад до списку
+                </button>
 
-            <div className="details-layout">
+                <div className="details-layout">
                 
                 {/* ЛІВА КОЛОНКА: Постер */}
                 <div className="details-poster-wrapper">
@@ -286,6 +287,7 @@ function MediaDetails(){
                 </div>
             )}
         </div>
+    </div>
     )
 }
 

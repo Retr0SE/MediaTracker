@@ -24,9 +24,9 @@ class UserMediaAPIList(generics.ListAPIView):
         cache_key = f'user_media_list_{request.user.id}'
         cached_data = cache.get(cache_key)
         if cached_data:
-            print('⚡ ШВИДКІСТЬ: Віддаємо дані з Redis!')
+            print('REDIS: Media list fetched from cache.')
             return Response(cached_data)
-        print('🐢 ПОВІЛЬНО: Робимо запит до PostgreSQL...')
+        print('PostgreSQL: Querying media list from DB...')
 
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
@@ -43,7 +43,7 @@ class AddMediaAPIView(APIView):
         imdb_id = request.data.get('imdb_id')
 
         if not title:
-            return Response({'error': "Назва або ID обов'язкові"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "Name or ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         media_data = fetch_omdb_info(title, media_type, imdb_id)
 
@@ -75,11 +75,12 @@ class AddMediaAPIView(APIView):
 
             if created:
                 cache.delete(f'user_media_list_{request.user.id}')
-                return Response({'message': "Фільм успішно додано!"}, status=status.HTTP_201_CREATED)
+                print(f"REDIS: Cache cleared for user {request.user.id}")
+                return Response({'message': 'Media successfully added to list.'}, status=status.HTTP_201_CREATED)
             else:
-                return Response({'message': "Цей фільм вже є у вашому списку."}, status=status.HTTP_200_OK)
+                return Response({'message': 'Media already exists in list.'}, status=status.HTTP_200_OK)
         else:
-            return Response({'message': "Фільм не знайдено в OMDb."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': "Media not found in OMDb."}, status=status.HTTP_404_NOT_FOUND)
 
 
 class DeleteMediaAPIView(APIView):
@@ -90,9 +91,9 @@ class DeleteMediaAPIView(APIView):
             media_to_delete = UserMedia.objects.get(id=pk, user=request.user)
             media_to_delete.delete()
             cache.delete(f'user_media_list_{request.user.id}')
-            return Response({'message': 'Фільм видалено'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': 'The film has been removed.'}, status=status.HTTP_204_NO_CONTENT)
         except UserMedia.DoesNotExist:
-            return Response({'error': 'Фільм не знайдено'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Film not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class LiveSearchAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -139,8 +140,8 @@ class UpdateMediaAPIView(APIView):
 
             user_media.save()
             cache.delete(f'user_media_list_{request.user.id}')
-            return Response({'message': 'Успішно оновлено!'})
+            return Response({'message': 'Successfully updated!'})
         except UserMedia.DoesNotExist:
-            return Response({'message': 'Фільм не знайдено'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Film not found'}, status=status.HTTP_404_NOT_FOUND)
 
 

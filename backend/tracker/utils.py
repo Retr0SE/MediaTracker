@@ -6,10 +6,10 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
     cache_key = f"omdb_{imdb_id}" if imdb_id else f"omdb_{title.replace(' ', '_')}_{media_type}"
     cached_movie = cache.get(cache_key)
     if cached_movie:
-        print(f"⚡ REDIS: Фільм {cache_key} віддано з пам'яті!")
+        print(f"REDIS: OMDb data for {cache_key} fetched from cache.")
         return cached_movie
 
-    print(f"🐢 OMDB API: Робимо реальний запит в інтернет...")
+    print(f"OMDB API: Fetching data from external source...")
 
     if media_type == 'movie':
         omdb_type = 'movie'
@@ -35,8 +35,8 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
     try:
         response = requests.get(url, params=params)
 
-        print('Статус OMDb: ', response.status_code)
-        print('Відповідь OMDb: ', response.text)
+        print('Status OMDb: ', response.status_code)
+        print('Response OMDb: ', response.text)
 
 
         if response.status_code == 200:
@@ -99,9 +99,9 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
                     'country': country,
                     'language': language,
                 }
-                
+
             cache.set(cache_key, result_data, timeout=2592000)
             return result_data
     except Exception as e:
-        print(f'Помилка OMDb: {e}')
+        print(f'OMDb error: {e}')
     return {}

@@ -5,7 +5,7 @@ const Footer = () => {
         <footer className="landing-footer">
             <div className="footer-content">
                 <div className="footer-section">
-                    <h3>My Media Tracker</h3>
+                    <h3>KINEMIO</h3>
                     <p>Твій особистий простір для відстеження фільмів, серіалів та аніме. Зберігай прогрес, став оцінки та ніколи не забувай, на якій серії зупинився.</p>
                 </div>
                 

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
+import { useToast } from '../ToastContext'
+
 
 function Home(){
   const [mediaList, setMediaList] = useState([])
@@ -13,22 +15,16 @@ function Home(){
   const [searchResults, setSearchResults] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
 
-  const [toast, setToast] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all')
 
   const [sortOrder, setSortOrder] = useState('default')
 
   const [visibleCount, setVisibleCount] = useState(12)
 
+  const { showToast} = useToast()
+
   const navigate = useNavigate()
   
-  const showToast = (text, type = 'success') => {
-    setToast({ text, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 3500);
-  };
-
   // === ЖИВИЙ ПОШУК ===
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -71,13 +67,15 @@ function Home(){
 
       const data = await response.json()
       if (response.ok) {
-        showToast(`✅ ${data.message}`, 'success')
+        showToast('Тайтл успішно додано до вашого списку!', 'success')
         fetchMyList() 
-      } else {
-        showToast(`❌ ${data.error || 'Помилка'}`, 'error')
+      } else if (response.status === 200){
+        showToast('Цей тайтл вже є у вашому списку.', 'error')
+      }else {
+        showToast('Сталася помилка при додаванні.', 'error')
       }
     } catch (error) {
-      showToast('❌ Помилка з\'єднання', 'error')
+      showToast('Помилка з\'єднання з сервером', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -428,15 +426,6 @@ function Home(){
             >
               Показати ще 
             </button>
-          </div>
-        )}
-
-        {/* ГЛОБАЛЬНИЙ РЕНДЕР TOAST */}
-        {toast && (
-          <div className="toast-container">
-            <div className={`toast ${toast.type}`}>
-              {toast.text}
-            </div>
           </div>
         )}
       </div>

@@ -1,30 +1,23 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../AuthContext'
+import { useToast } from '../../ToastContext'
 
 function Login(){
     const [ username, setUsername] = useState('')
     const [ password, setPassword] = useState('')
-    const [ isLoading, setIsLoading] = useState(false)
-
-    const [toast, setToast] = useState(null); 
+    const [ isLoading, setIsLoading] = useState(false) 
 
     const navigate = useNavigate()
     const {login} = useAuth()
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-    const showToast = (text, type = 'success') => {
-        setToast({ text, type })
-        setTimeout(() => {
-            setToast(null)
-        }, 3500)
-    }
+    const {showToast} = useToast()
 
     const handleLogin = async (e) => {
         e.preventDefault()
         setIsLoading(true)
-        setToast(null)
 
         try{
             const response = await fetch(`${API_URL}/api/token/`, {
@@ -39,6 +32,7 @@ function Login(){
 
             if (response.ok) {
                 login(data.access, data.refresh)
+                showToast('Ви успішно увійшли!', 'success')
                 navigate('/')
             } else {
                 if (response === 401){
@@ -109,14 +103,6 @@ function Login(){
                     Немає акаунту? <Link to="/register">Зареєструватися</Link>
                 </div>
             </div>
-            
-            {toast && (
-                <div className="toast-container">
-                    <div className={`toast ${toast.type}`}>
-                        {toast.text}
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

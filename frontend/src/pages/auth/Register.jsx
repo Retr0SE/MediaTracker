@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../AuthContext'
+import { useToast } from '../../ToastContext'
 
 function Register(){
     const [username, setUsername] = useState('')
@@ -9,22 +10,16 @@ function Register(){
     const [isLoading, setIsLoading] = useState(false)
 
     const {login} = useAuth()
-    const [toast, setToast] = useState(null); 
+
     const navigate = useNavigate()
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-    const showToast = (text, type = 'success') => {
-        setToast({ text, type })
-        setTimeout(() => {
-            setToast(null)
-        }, 3500)
-    }
+    const {showToast} = useToast()
 
     const handleRegister = async (e) => {
         e.preventDefault()
         setIsLoading(true)
-        setToast(null)
 
         try{
             const response = await fetch(`${API_URL}/api/users/register/`, {
@@ -41,7 +36,6 @@ function Register(){
                 if (response.status === 400) {
                 let errorMessage = 'Помилка перевірки даних';
                 
-                // Аналізуємо, в якому полі сталася помилка, і перекладаємо
                 if (data.username) {
                     errorMessage = data.username[0].includes('exists') 
                         ? 'Користувач з таким логіном вже існує' 
@@ -80,10 +74,11 @@ function Register(){
             const loginData = await loginResponse.json()
 
             if (loginResponse.ok) {
+                showToast('Акаунт створено! Ви успішно увійшли.', 'success')
                 login(loginData.access, loginData.refresh)
                 navigate('/')
             } else {
-                showToast('Акаунт створено. Будь ласка, увійдіть вручну.', 'success')
+                showToast('Акаунт створено! Будь ласка, увійдіть.', 'success')
                 navigate('/login')
             }
 
@@ -148,14 +143,6 @@ function Register(){
                     Вже маєте акаунт? <Link to="/login">Увійти</Link>
                 </div>
             </div>
-            
-            {toast && (
-                <div className="toast-container">
-                    <div className={`toast ${toast.type}`}>
-                        {toast.text}
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

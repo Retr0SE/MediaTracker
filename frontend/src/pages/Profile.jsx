@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../AuthContext'
+import { useToast } from '../ToastContext'
 
 export default function Profile() {
     const [mediaList, setMediaList] = useState([])
@@ -7,6 +8,8 @@ export default function Profile() {
     const [userData, setUserData] = useState(null)
 
     const {token, authFetch} = useAuth()
+
+    const { showToast }= useToast()
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -26,6 +29,12 @@ export default function Profile() {
     const file = event.target.files[0]
     if (!file) return
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024
+    if (file.size > MAX_FILE_SIZE){
+        showToast('Файл занадто великий. Максимум 5 MB.', 'error')
+        return
+    }
+
     const formData = new FormData()
     formData.append('avatar', file)
 
@@ -41,13 +50,15 @@ export default function Profile() {
         if (response.ok) {
             const updatedUser = await response.json()
             setUserData(prev => ({...prev, avatar: updatedUser.avatar}))
-            console.log('Аватарку успішно оновлено!')
+            showToast('Аватарку успішно оновлено!', 'success')
         } else {
             const errorData = await response.json()
-            console.error('Не вдалося оновити аватарку', errorData)
+            console.error('API Error:', errorData)
+            showToast('Не вдалося оновити аватарку. Перевірте формат файлу.', 'error')
         }
     } catch (error) {
-        console.error('Помилка завантаження файлу:', error)
+        console.error('Network Error:', error)
+        showToast('Помилка з\'єднання з сервером', 'error')
     }
 }
 

@@ -27,10 +27,10 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         cached_profile = cache.get(cache_key)
 
         if cached_profile:
-            print("⚡ REDIS: Профіль віддано з пам'яті!")
+            print("REDIS: User profile fetched from cache.")
             return Response(cached_profile)
 
-        print("🐢 PostgreSQL: Беремо профіль з бази...")
+        print("PostgreSQL: Querying user profile from DB...")
         response = super().retrieve(request, *args, **kwargs)
         cache.set(cache_key, response.data, timeout=3600)
         return response
@@ -39,5 +39,5 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         response = super().update(request, *args, **kwargs)
         cache_key = f"user_profile_{request.user.id}"
         cache.delete(cache_key)
-        print("🗑️ REDIS: Старий кеш профілю очищено!")
+        print("REDIS: User profile cache invalidated.")
         return response

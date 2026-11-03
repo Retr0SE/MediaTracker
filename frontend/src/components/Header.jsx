@@ -1,12 +1,15 @@
 import { useAuth } from '../AuthContext'
 import { Link, replace, useNavigate } from 'react-router-dom'
+import { useToast } from '../ToastContext'
 
 export default function Header({ isSimple = false}){
     const { logout } = useAuth()
     const { navigate } = useNavigate()
+    const { showToast } = useToast()
 
     const handleLogout = () => {
         logout()
+        showToast('Ви вийшли з системи.', 'success')
         navigate("/", {replace: true})   
     }
 
@@ -15,7 +18,7 @@ export default function Header({ isSimple = false}){
             
             {/* ЛІВА ЧАСТИНА: Логотип */}
             <Link to="/" className="header-logo">
-                MediaTracker
+                KINEMIO
             </Link>
             
 

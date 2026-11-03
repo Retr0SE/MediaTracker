@@ -41,7 +41,7 @@ export default function Landing() {
         <main className="media-landing" ref={pageRef}>
             
             <nav className="ml-glass-nav ml-reveal">
-                <div className="ml-nav-logo">MEDIATRACKER</div>
+                <div className="ml-nav-logo">KINEMIO</div>
                 <div className="ml-nav-links">
                     {isAuthenticated ? (
                         <Link to="/list" className="ml-button ml-button-small">Моя колекція</Link>
