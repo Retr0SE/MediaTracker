@@ -1,38 +1,47 @@
 from .models import UserMedia, MediaItem
-from rest_framework import generics, status 
-from .serializers import UserMediaSerializer
+from rest_framework import generics, status, filters
+from .serializers import UserMediaSerializer, ReviewSerializer, UniversalMediaDetailSerializer
 from rest_framework.permissions import IsAuthenticated
 from .utils import fetch_omdb_info
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
 import requests
-from rest_framework.decorators import api_view, permission_classes
 from django.core.cache import cache
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import F, Case, When, Value, IntegerField
 
 
-# Create your views here.
 
-class UserMediaAPIList(generics.ListAPIView):
+
+class NullsLastOrderingFilter(filters.OrderingFilter):
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            f_ordering = []
+            for field in ordering:
+                if field.startswith('-'):
+                    f_ordering.append(F(field[1:]).desc(nulls_last=True))
+                else:
+                    f_ordering.append(F(field).asc(nulls_last=True))
+            return queryset.order_by(*f_ordering)
+        return queryset
+
+            
+
+class UserMediaListAPIView(generics.ListAPIView):
     serializer_class = UserMediaSerializer
     permission_classes = [IsAuthenticated]
 
+    filter_backends = [DjangoFilterBackend, NullsLastOrderingFilter]
+    filterset_fields = ['status', 'media_item__media_type']
+
+    ordering_fields = ['id', 'score', 'media_item__title', 'media_item__release_year']
+    ordering = ['-id']
+
     def get_queryset(self):
-        return UserMedia.objects.filter(user=self.request.user).select_related('media_item').all()
+        return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
 
-    def list(self, request, *args, **kwargs):
-        cache_key = f'user_media_list_{request.user.id}'
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            print('REDIS: Media list fetched from cache.')
-            return Response(cached_data)
-        print('PostgreSQL: Querying media list from DB...')
-
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        cache.set(cache_key, serializer.data, timeout=900)
-
-        return Response(serializer.data)
 
 class AddMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -74,8 +83,6 @@ class AddMediaAPIView(APIView):
             )
 
             if created:
-                cache.delete(f'user_media_list_{request.user.id}')
-                print(f"REDIS: Cache cleared for user {request.user.id}")
                 return Response({'message': 'Media successfully added to list.'}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'message': 'Media already exists in list.'}, status=status.HTTP_200_OK)
@@ -90,7 +97,6 @@ class DeleteMediaAPIView(APIView):
         try:
             media_to_delete = UserMedia.objects.get(id=pk, user=request.user)
             media_to_delete.delete()
-            cache.delete(f'user_media_list_{request.user.id}')
             return Response({'message': 'The film has been removed.'}, status=status.HTTP_204_NO_CONTENT)
         except UserMedia.DoesNotExist:
             return Response({'error': 'Film not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -139,9 +145,72 @@ class UpdateMediaAPIView(APIView):
                 user_media.review = request.data.get('review')  
 
             user_media.save()
-            cache.delete(f'user_media_list_{request.user.id}')
             return Response({'message': 'Successfully updated!'})
         except UserMedia.DoesNotExist:
             return Response({'message': 'Film not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+class FriendMediaAPIList(generics.ListAPIView):
+    serializer_class = UserMediaSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        friend_id = self.kwargs.get('user_id')
+        return UserMedia.objects.filter(user_id=friend_id).select_related('media_item').order_by('-added_at')
+
+    def list(self, request, *args, **kwargs):
+        friend_id = self.kwargs.get('user_id')
+        page = request.query_params.get('page', 1)
+
+        cache_key = f'user_media_list_{friend_id}_page_{page}'
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            print(f'REDIS: Friend media list(ID {friend_id}, Page {page} from_DB...)')
+            return Response(cached_data)
+
+        print(f'PostgerSQL: Querying friend media list (ID {friend_id}, Page {page} from DB...)')
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=900)
+        return response
+
+class UserMediaDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = UserMediaSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
+
+
+class UserMediaAllAPIView(generics.ListAPIView):
+    serializer_class = UserMediaSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
+
+class MediaReviewAPIView(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        media_id = self.kwargs.get('media_item_id')
+        user = self.request.user
+
+        friends_ids = user.following.values_list('id', flat=True)
+        queryset = UserMedia.objects.filter(media_item_id=media_id).exclude(review__exact='')
+        queryset = queryset.annotate(priority=Case(When(user=user, then=Value(2)),
+                When(user_id__in=friends_ids, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        )
+        return queryset.order_by('-priority', 'added_at')
+
+
+class UniversalMediaDetailAPIView(generics.RetrieveAPIView):
+    queryset = MediaItem.objects.all()
+    serializer_class = UniversalMediaDetailSerializer
+    permission_classes = [IsAuthenticated]

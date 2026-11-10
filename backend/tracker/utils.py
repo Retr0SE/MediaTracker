@@ -13,9 +13,8 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
 
     if media_type == 'movie':
         omdb_type = 'movie'
-    elif media_type in ['series', 'anime']:
+    elif media_type == 'series':
         omdb_type = 'series'
-
     else:
         return {}
 
@@ -45,17 +44,15 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
                 poster = data.get('Poster')
                 poster_url = poster if poster != 'N/A' else None
 
-                year_str = str(data.get('Year', '')).strip()[:4]
-                year = int(year_str) if year_str.isdigit() else None
+                year_str = str(data.get('Year', '')).strip()
+                year = year_str if year_str else None
 
                 plot = data.get('Plot')
                 description = plot if plot != 'N/A' else ''
 
-                runtime = data.get("Runtime")
-                if runtime and runtime != "N/A":
-                    duration = int(runtime.split()[0])
-                else:
-                    duration = None
+                runtime_raw = str(data.get("Runtime", ''))
+                runtime_isdigit = ''.join([char for char in runtime_raw if char.isdigit()])
+                runtime = int(runtime_isdigit) if runtime_isdigit else None
 
                 seasons_str = data.get('totalSeasons')
                 seasons = int(seasons_str) if seasons_str and seasons_str.isdigit() else None
@@ -89,7 +86,7 @@ def fetch_omdb_info(title, media_type, imdb_id=None):
                     'poster_url': poster_url,
                     'release_year': year,
                     'description': description,
-                    'duration': duration, 
+                    'runtime': runtime, 
                     'seasons': seasons,
                     'genre': genre,
                     'imdb_rating': imdb_rating,
