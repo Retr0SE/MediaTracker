@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../AuthContext'
 import { useToast } from '../ToastContext'
+import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config'
 
 export default function Profile() {
+    const navigate = useNavigate()
+
     const [mediaList, setMediaList] = useState([])
     const [loading, setLoading] = useState(true)
     const [userData, setUserData] = useState(null)
@@ -10,8 +14,6 @@ export default function Profile() {
     const {token, authFetch} = useAuth()
 
     const { showToast }= useToast()
-
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
     const fileInputRef = useRef(null)
 
@@ -22,7 +24,7 @@ export default function Profile() {
     const getAvatarUrl = (avatarPath) => {
         if(!avatarPath) return '/default-avatar.png'
         if(avatarPath.startsWith('http')) return avatarPath
-        return `${API_URL}${avatarPath}`
+        return `${API_BASE_URL}${avatarPath}`
     }
 
     const handleFileChange = async (event) => {
@@ -39,7 +41,7 @@ export default function Profile() {
     formData.append('avatar', file)
 
     try {
-        const response = await fetch(`${API_URL}/api/users/profile/`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/profile/`, {
             method: 'PATCH',
             headers: {
                 'Authorization' : `Bearer ${token}`
@@ -66,7 +68,7 @@ export default function Profile() {
         const fetchMyList = async () => {
             try {
                 const [listResponse, userResponse] = await Promise.all([
-                    authFetch('/api/media/my-list/'),
+                    authFetch('/api/media/my-list/all/'),
                     authFetch('/api/users/profile/')
                 ]);
 
@@ -106,7 +108,8 @@ export default function Profile() {
     let topImdbMedia = null
     let maxImdbRating = 0
 
-    completedItems.forEach(item => {
+    const validForRecords = mediaList.filter(item => item.status === 'completed' || item.score > 0)
+    validForRecords.forEach(item => {
         const media = item.media_item || item.media;
         if (!media) return
 
@@ -116,7 +119,7 @@ export default function Profile() {
             oldestMedia = item
         }
 
-        const durationStr = String(media.duration || "0").replace(/\D/g, '')
+        const durationStr = String(media.runtime || "0").replace(/\D/g, '')
         const durationInt = parseInt(durationStr, 10)
         if (!isNaN(durationInt) && durationInt > maxDuration){
             maxDuration = durationInt
@@ -181,7 +184,7 @@ export default function Profile() {
 
     const totalMinutes = completedItems.reduce((acc, item) => {
         const media = item.media_item || item.media
-        const durationStr = String(media?.duration || "0").replace(/\D/g, '')
+        const durationStr = String(media?.runtime || "0").replace(/\D/g, '')
         return acc + (parseInt(durationStr, 10) || 0)
     }, 0)
     const totalHours = Math.floor(totalMinutes / 60)
@@ -265,7 +268,6 @@ export default function Profile() {
     const radius = 42;
     const circumference = 2 * Math.PI * radius;
     
-    // 1. Рахуємо частоту кожного жанру у списку користувача
     const genreCounts = {};
     mediaList.forEach(item => {
         const genresStr = (item.media_item || item.media)?.genre || "";
@@ -281,7 +283,6 @@ export default function Profile() {
 
     const topGenres = sortedGenres.slice(0, 4);
 
-    // 4. Решту групуємо в категорію "Інше"
     const otherGenresCount = sortedGenres.slice(4).reduce((acc, curr) => acc + curr[1], 0);
 
     const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']; // Фіолетовий, Синій, Зелений, Жовтий
@@ -438,8 +439,10 @@ export default function Profile() {
                                 <div className="records-grid">
                                     
                                     {oldestMedia && (
-                                        /* ДОДАНО glass-card */
-                                        <div className="record-card glass-card" style={{ display: 'flex', flexDirection: 'row', padding: 0 }}>
+                                        <div 
+                                            className="record-card glass-card"
+                                            style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/catalog/${(oldestMedia.media_item || oldestMedia.media).id}`)}>
                                             <img src={(oldestMedia.media_item || oldestMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label">Найдревніший тайтл</div>
@@ -450,18 +453,23 @@ export default function Profile() {
                                     )}
 
                                     {longestMedia && (
-                                        <div className="record-card glass-card" style={{ display: 'flex', flexDirection: 'row', padding: 0 }}>
+                                        <div className="record-card glass-card" 
+                                            style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/catalog/${(longestMedia.media_item || longestMedia.media).id}`)}>
                                             <img src={(longestMedia.media_item || longestMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label">Найдовший тайтл</div>
                                                 <div className="record-title">{(longestMedia.media_item || longestMedia.media).title}</div>
-                                                <div className="record-value">Тривалість: <strong>{(longestMedia.media_item || longestMedia.media).duration}</strong></div>
+                                                <div className="record-value">Тривалість: <strong>{(longestMedia.media_item || longestMedia.media).runtime}</strong></div>
                                             </div>
                                         </div>
                                     )}
 
                                     {epicSeries && (
-                                        <div className="record-card glass-card" style={{ display: 'flex', flexDirection: 'row', padding: 0 }}>
+                                        <div 
+                                            className="record-card glass-card"     
+                                            style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/catalog/${(epicSeries.media_item || epicSeries.media).id}`)}>
                                             <img src={(epicSeries.media_item || epicSeries.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--accent-blue)' }}>Серіальний епік</div>
@@ -472,7 +480,10 @@ export default function Profile() {
                                     )}
 
                                     {topImdbMedia && (
-                                        <div className="record-card glass-card" style={{ display: 'flex', flexDirection: 'row', padding: 0 }}>
+                                        <div 
+                                            className="record-card glass-card" 
+                                            style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/catalog/${(topImdbMedia.media_item || topImdbMedia.media).id}`)}>
                                             <img src={(topImdbMedia.media_item || topImdbMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--accent-star, #fbbf24)' }}>Фаворит IMDb</div>
@@ -483,7 +494,10 @@ export default function Profile() {
                                     )}
 
                                     {worstMedia && worstMedia.score < 5 && (
-                                        <div className="record-card glass-card" style={{ display: 'flex', flexDirection: 'row', padding: 0 }}>
+                                        <div 
+                                            className="record-card glass-card" 
+                                            style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/catalog/${(worstMedia.media_item || worstMedia.media).id}`)}>
                                             <img src={(worstMedia.media_item || worstMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--danger)' }}>Найбільше розчарування</div>

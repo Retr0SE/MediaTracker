@@ -1,12 +1,14 @@
 import { useAuth } from './AuthContext'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import MediaDetails from './pages/MediaDetails'
-import Home from './pages/Home'
+import UserList from './pages/UserList'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import Profile from './pages/Profile'
+import FriendProfile from './pages/FriendProfile'
 import Header from './components/Header'
 import Landing from './pages/Landing'
+import FriendsList from './pages/FriendsList'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -27,9 +29,11 @@ function App() {
         <Route path='/register' element={!isAuthenticated ? <Register /> : <Navigate to='/list' replace />} />
 
         <Route path='/' element={!isAuthenticated ? <Landing/> : <Navigate to='/list' replace />} />
-        <Route path='/list' element={isAuthenticated ? <Home/> : <Navigate to='/' replace />} />
-        <Route path='/media/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/' replace />} />
+        <Route path='/list' element={isAuthenticated ? <UserList/> : <Navigate to='/' replace />} />
+        <Route path='/friends' element={isAuthenticated ? <FriendsList/> : <Navigate to='/' replace />} />
+        <Route path='/catalog/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/' replace />} />
         <Route path='/profile' element={isAuthenticated ? <Profile/> : <Navigate to='/' replace />} />
+        <Route path='/user/:id' element={isAuthenticated ? <FriendProfile/> : <Navigate to='/' replace />} />
 
         <Route path='*' element={<NotFound />}/>
       </Routes>
