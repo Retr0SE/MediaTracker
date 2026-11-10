@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../AuthContext'
 import { useToast } from '../../ToastContext'
+import { API_BASE_URL } from '../../config'
 
 function Login(){
     const [ username, setUsername] = useState('')
@@ -11,8 +12,6 @@ function Login(){
     const navigate = useNavigate()
     const {login} = useAuth()
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
     const {showToast} = useToast()
 
     const handleLogin = async (e) => {
@@ -20,7 +19,7 @@ function Login(){
         setIsLoading(true)
 
         try{
-            const response = await fetch(`${API_URL}/api/token/`, {
+            const response = await fetch(`${API_BASE_URL}/api/token/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,17 +34,17 @@ function Login(){
                 showToast('Ви успішно увійшли!', 'success')
                 navigate('/')
             } else {
-                if (response === 401){
+                if (response.status === 401){
                     showToast('Неправильний логін або пароль', 'error')
                 }
-                else if (response === 400){
+                else if (response.status === 400){
                     const errorMsg = data.detail || data.non_field_errors?.[0] || "Помилка валідації даних"
                     showToast(errorMsg, 'error')
                 }
-                else if (response === 429){
+                else if (response.status === 429){
                     showToast('Забагато спроб входу. Зачекайте хвилинку', 'error')
                 }
-                else if (response === 500){
+                else if (response.status === 500){
                     showToast('Проблеми на сервері. Спробуйте пізніше', 'error')
                 }
                 else{

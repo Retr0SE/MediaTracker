@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../AuthContext'
 import { useToast } from '../../ToastContext'
+import { API_BASE_URL } from '../../config'
 
 function Register(){
     const [username, setUsername] = useState('')
@@ -12,9 +13,6 @@ function Register(){
     const {login} = useAuth()
 
     const navigate = useNavigate()
-
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
     const {showToast} = useToast()
 
     const handleRegister = async (e) => {
@@ -22,7 +20,7 @@ function Register(){
         setIsLoading(true)
 
         try{
-            const response = await fetch(`${API_URL}/api/users/register/`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/register/`, {
                 method: 'POST',
                 headers:{
                     'Content-Type': 'application/json',
@@ -64,7 +62,7 @@ function Register(){
             return
         }
         
-            const loginResponse = await fetch(`${API_URL}/api/token/`, {
+            const loginResponse = await fetch(`${API_BASE_URL}/api/token/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
