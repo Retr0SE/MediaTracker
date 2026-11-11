@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../AuthContext'
-import { useToast } from '../ToastContext'
+import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from '../config'
 
-export default function Profile() {
+export default function ProfilePage() {
     const navigate = useNavigate()
 
     const [mediaList, setMediaList] = useState([])
@@ -264,7 +264,6 @@ export default function Profile() {
     ];
 
     
-    // === ДАНІ ДЛЯ КРУГОВОЇ ДІАГРАМИ (АНАЛІТИКА ЖАНРІВ) ===
     const radius = 42;
     const circumference = 2 * Math.PI * radius;
     
@@ -285,7 +284,7 @@ export default function Profile() {
 
     const otherGenresCount = sortedGenres.slice(4).reduce((acc, curr) => acc + curr[1], 0);
 
-    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']; // Фіолетовий, Синій, Зелений, Жовтий
+    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b'];
 
     const chartData = topGenres.map(([name, count], index) => ({
         id: name,
@@ -299,7 +298,7 @@ export default function Profile() {
             id: 'other',
             label: 'Інше',
             value: otherGenresCount,
-            color: '#4b5563' // Приглушений сірий для всіх інших жанрів
+            color: '#4b5563'
         });
     }
 
@@ -385,7 +384,6 @@ export default function Profile() {
                                             })}
                                         </svg>
                                         
-                                        {/* У центрі виводимо улюблений жанр */}
                                         <div className="donut-center">
                                             <span className="donut-center-value" style={{fontSize: chartData[0]?.label.length > 8 ? '1.2rem' : '1.5rem', color: chartData[0]?.color}}>
                                                 {chartData[0]?.label || '-'}
@@ -416,11 +414,9 @@ export default function Profile() {
                                 </div>
                             </div>
                         )}
-                        {/* СЕКЦІЯ 1: ДОСЯГНЕННЯ */}
                         <h2 className="section-title">Нагороди профілю</h2>
                         <div className="achievements-grid">
                             {achievements.map(ach => (
-                                /* ДОДАНО glass-card */
                                 <div key={ach.id} className={`achievement-card glass-card ${ach.unlocked ? 'unlocked' : 'locked'}`}>
                                     <div className="achievement-icon">{ach.icon}</div>
                                     <div className="achievement-title">{ach.title}</div>
@@ -431,7 +427,6 @@ export default function Profile() {
                             ))}
                         </div>
 
-                        {/* СЕКЦІЯ 2: ЗАЛА СЛАВИ (РЕКОРДИ) */}
                         {(oldestMedia || longestMedia || worstMedia) && (
                             <>
                                 <h2 className="section-title">Мої кіно-рекорди</h2>

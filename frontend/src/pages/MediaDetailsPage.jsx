@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config";
 
-function MediaDetails(){
+function MediaDetailsPage(){
     const { id } = useParams()
     const navigate = useNavigate()
 
@@ -393,50 +393,70 @@ function MediaDetails(){
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             {reviews.filter(r => r.review && r.review.trim() !== "").map(review => (
-                            <div key={review.id} className="glass-card" style={{ padding: '20px', borderRadius: '16px', marginBottom: '20px' }}>
-                                <div style={{ display: 'flex', gap: '16px' }}>
-                                    <img 
-                                        src={getAvatarUrl(review.user_avatar)} 
-                                        alt={review.username} 
-                                        style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                                    />
-                                    <div style={{ flexGrow: 1 }}>
-                                        
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
+                                <div key={review.id} className="glass-card" style={{ padding: '20px', borderRadius: '16px', marginBottom: '20px' }}>
+                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                        <img 
+                                            src={getAvatarUrl(review.user_avatar)} 
+                                            alt={review.username}
+                                            onClick={() =>{
+                                                if (!review.is_mine) navigate(`/user/${review.user_id}`)
+                                            }}
+                                            style={{ 
+                                                width: '50px', 
+                                                height: '50px', 
+                                                borderRadius: '50%', 
+                                                objectFit: 'cover', 
+                                                flexShrink: 0,
+                                                cursor: review.is_mine ? 'default':'pointer'
+                                            }}
+                                        />
+                                        <div style={{ flexGrow: 1 }}>
                                             
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                                <h3 style={{ margin: 0, color: review.is_friend || review.is_mine ? 'var(--accent-blue)' : 'white' }}>
-                                                    {review.username}
-                                                </h3>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
                                                 
-                                                {review.is_mine && (
-                                                    <div className="priority-badge mine" style={{ position: 'static', margin: 0 }}>Твій відгук</div>
-                                                )}
-                                                {review.is_friend && (
-                                                    <div className="priority-badge friend" style={{ position: 'static', margin: 0 }}>Відгук друга</div>
-                                                )}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                                    <h3 
+                                                        onClick={() =>{
+                                                            if(!review.is_mine) navigate(`/user/${review.user_id}`)
+                                                        }}
+                                                        style={{ 
+                                                            margin: 0, 
+                                                            color: 'white',
+                                                            cursor: review.is_mine ? 'default':'pointer'
+                                                        }}
+                                                        className="review-author-name" 
+                                                    >
+                                                        {review.username}
+                                                    </h3>
+                                                    
+                                                    {review.is_mine && (
+                                                        <div className="priority-badge mine" style={{ position: 'static', margin: 0 }}>Твій відгук</div>
+                                                    )}
+                                                    {review.is_friend && (
+                                                        <div className="priority-badge friend" style={{ position: 'static', margin: 0 }}>Відгук друга</div>
+                                                    )}
+                                                </div>
+
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
+                                                    {new Date(review.added_at).toLocaleDateString('uk-UA')}
+                                                </span>
                                             </div>
 
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
-                                                {new Date(review.added_at).toLocaleDateString('uk-UA')}
-                                            </span>
+                                            {review.score > 0 && (
+                                                <div style={{ color: 'var(--accent-star, #fbbf24)', fontWeight: 'bold', marginBottom: '12px', fontSize: '0.95rem' }}>
+                                                    Оцінка: {review.score}/10 ★
+                                                </div>
+                                            )}
+
+                                            {review.review && review.review.trim() !== "" && (
+                                                <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                                                    "{review.review}"
+                                                </p>
+                                            )}
                                         </div>
-
-                                        {review.score > 0 && (
-                                            <div style={{ color: 'var(--accent-star, #fbbf24)', fontWeight: 'bold', marginBottom: '12px', fontSize: '0.95rem' }}>
-                                                Оцінка: {review.score}/10 ★
-                                            </div>
-                                        )}
-
-                                        {review.review && review.review.trim() !== "" && (
-                                            <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                                "{review.review}"
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
                             {nextReviewsUrl && (
                                 <button 
@@ -464,4 +484,4 @@ function MediaDetails(){
     )
 }
 
-export default MediaDetails;
+export default MediaDetailsPage;

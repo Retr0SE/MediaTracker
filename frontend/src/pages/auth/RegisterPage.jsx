@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../AuthContext'
-import { useToast } from '../../ToastContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { API_BASE_URL } from '../../config'
 
-function Register(){
+function RegisterPage(){
     const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -145,4 +145,4 @@ function Register(){
     )
 }
 
-export default Register
+export default RegisterPage

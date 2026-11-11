@@ -1,15 +1,16 @@
-import { useAuth } from './AuthContext'
+import { useAuth } from './contexts/AuthContext'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import MediaDetails from './pages/MediaDetails'
-import UserList from './pages/UserList'
-import Login from './pages/auth/Login'
-import Register from './pages/auth/Register'
-import Profile from './pages/Profile'
-import FriendProfile from './pages/FriendProfile'
+import MediaDetailsPage from './pages/MediaDetailsPage'
+import MyListPage from './pages/MyListPage'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
+import FriendsListPage from './pages/FriendsListPage'
+import FriendProfilePage from './pages/FriendProfilePage'
+
 import Header from './components/Header'
-import Landing from './pages/Landing'
-import FriendsList from './pages/FriendsList'
-import NotFound from './pages/NotFound'
+import LandingPage from './pages/LandingPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
 
@@ -25,17 +26,17 @@ function App() {
       {showHeader && <Header isSimple={isAuthPath}/>}
 
       <Routes>
-        <Route path='/login' element={!isAuthenticated ? <Login/> : <Navigate to='/list' replace />} />
-        <Route path='/register' element={!isAuthenticated ? <Register /> : <Navigate to='/list' replace />} />
+        <Route path='/login' element={!isAuthenticated ? <LoginPage/> : <Navigate to='/list' replace />} />
+        <Route path='/register' element={!isAuthenticated ? <RegisterPage /> : <Navigate to='/list' replace />} />
 
-        <Route path='/' element={!isAuthenticated ? <Landing/> : <Navigate to='/list' replace />} />
-        <Route path='/list' element={isAuthenticated ? <UserList/> : <Navigate to='/' replace />} />
-        <Route path='/friends' element={isAuthenticated ? <FriendsList/> : <Navigate to='/' replace />} />
-        <Route path='/catalog/:id' element={isAuthenticated ? <MediaDetails/> : <Navigate to='/' replace />} />
-        <Route path='/profile' element={isAuthenticated ? <Profile/> : <Navigate to='/' replace />} />
-        <Route path='/user/:id' element={isAuthenticated ? <FriendProfile/> : <Navigate to='/' replace />} />
+        <Route path='/' element={!isAuthenticated ? <LandingPage/> : <Navigate to='/list' replace />} />
+        <Route path='/list' element={isAuthenticated ? <MyListPage/> : <Navigate to='/' replace />} />
+        <Route path='/friends' element={isAuthenticated ? <FriendsListPage/> : <Navigate to='/' replace />} />
+        <Route path='/catalog/:id' element={isAuthenticated ? <MediaDetailsPage/> : <Navigate to='/' replace />} />
+        <Route path='/profile' element={isAuthenticated ? <ProfilePage/> : <Navigate to='/' replace />} />
+        <Route path='/user/:id' element={isAuthenticated ? <FriendProfilePage/> : <Navigate to='/' replace />} />
 
-        <Route path='*' element={<NotFound />}/>
+        <Route path='*' element={<NotFoundPage />}/>
       </Routes>
     </>
   ) 

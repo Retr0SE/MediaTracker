@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../AuthContext'
-import { useToast } from '../ToastContext'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { API_BASE_URL } from '../config'
 
 
-function UserList(){
+function MyListPage(){
   const [mediaList, setMediaList] = useState([])
   const [nextPageUrl, setNextPageUrl] = useState(null)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
@@ -311,4 +311,4 @@ function UserList(){
     );
 }
 
-export default UserList;
+export default MyListPage;

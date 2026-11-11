@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useRef } from 'react';
 import Footer from '../components/Footer';
 
@@ -15,7 +15,7 @@ const FEATURES = [
     { num: '03', title: 'Усе організовано', text: 'Не доведеться шукати назви фільмів у нотатках або повідомленнях.' }
 ];
 
-export default function Landing() {
+export default function LandingPage() {
     const { isAuthenticated } = useAuth();
     const pageRef = useRef(null);
 
@@ -230,7 +230,6 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* СЕКЦІЯ 5: НОВА - АНАЛІТИКА */}
             <section className="ml-analytics">
                 <div className="ml-container">
                     <div className="ml-analytics-layout">
@@ -277,7 +276,6 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* СЕКЦІЯ 6: НОВА - ЦИТАТА/БАНЕР */}
             <section className="ml-quote-banner ml-reveal">
                 <div className="ml-container">
                     <div className="ml-quote-inner">

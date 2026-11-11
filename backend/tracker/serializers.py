@@ -15,6 +15,7 @@ class UserMediaSerializer(serializers.ModelSerializer):
         fields = ['id', 'media_item', 'status', 'status_display', 'score', 'review']
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True) 
     username = serializers.CharField(source='user.username', read_only=True)
     user_avatar = serializers.SerializerMethodField()
 
@@ -23,7 +24,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserMedia
-        fields = ['id', 'username', 'user_avatar', 'score', 'review', 'added_at', 'status', 'is_friend', 'is_mine']
+        fields = ['id','user_id', 'username', 'user_avatar', 'score', 'review', 'added_at', 'status', 'is_friend', 'is_mine']
 
     def get_user_avatar(self, obj):
         if obj.user.avatar:
@@ -34,7 +35,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         return getattr(obj, 'priority', 0) == 1
         
     def get_is_mine(self, obj):
-       return getattr(obj, 'priority', 0) == 2
+        return getattr(obj, 'priority', 0) == 2
 
 class UniversalMediaDetailSerializer(serializers.ModelSerializer):
     user_record = serializers.SerializerMethodField()

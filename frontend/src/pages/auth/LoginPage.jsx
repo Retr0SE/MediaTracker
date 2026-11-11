@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../AuthContext'
-import { useToast } from '../../ToastContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { API_BASE_URL } from '../../config'
 
-function Login(){
+function LoginPage(){
     const [ username, setUsername] = useState('')
     const [ password, setPassword] = useState('')
     const [ isLoading, setIsLoading] = useState(false) 
@@ -106,4 +106,4 @@ function Login(){
     )
 }
 
-export default Login
+export default LoginPage

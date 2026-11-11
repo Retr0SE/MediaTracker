@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useToast } from '../ToastContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { API_BASE_URL } from '../config';
 
-const FriendProfile = () => {
+const FriendProfilePage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { authFetch } = useAuth();
@@ -228,4 +228,4 @@ const FriendProfile = () => {
     );
 };
 
-export default FriendProfile;
+export default FriendProfilePage;

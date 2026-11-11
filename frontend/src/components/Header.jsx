@@ -1,6 +1,6 @@
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useToast } from '../ToastContext'
+import { useToast } from '../contexts/ToastContext'
 import { useState, useEffect } from 'react'
 import { API_BASE_URL } from '../config'
 
