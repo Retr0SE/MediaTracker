@@ -209,12 +209,13 @@ function MediaDetails(){
 
                 <div className="details-layout">
                 
-                {/* ЛІВА КОЛОНКА: Постер */}
                 <div className="details-poster-wrapper">
                     <img
                         className="details-poster"
                         src={movie.poster_url && movie.poster_url !== 'N/A' ? movie.poster_url : 'https://placehold.co/400x600?text=No+Poster'}
                         alt={movie.title || 'Постер'}
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                             e.currentTarget.onerror = null
                             e.currentTarget.src = 'https://placehold.co/400x600?text=No+Poster'

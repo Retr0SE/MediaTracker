@@ -180,6 +180,8 @@ const FriendProfile = () => {
                                         <img
                                             src={getPosterUrl(media.poster_url)}
                                             alt={media.title}
+                                            loading='lazy'
+                                            decoding='async'
                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x600?text=No+Poster'}}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />

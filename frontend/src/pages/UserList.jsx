@@ -12,10 +12,6 @@ function UserList(){
   const {token, authFetch} = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
-  const [showDropdown, setShowDropdown] = useState(false)
-
   const [activeFilter, setActiveFilter] = useState('all')
   const [sortOrder, setSortOrder] = useState('default')
 
@@ -39,60 +35,7 @@ function UserList(){
         return url
 
     }
-  
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.trim().length >= 3) {
-        try {
-          const response = await authFetch(`/api/media/search/?q=${searchQuery}`)
-          if (response.ok) {
-            const data = await response.json()
-            setSearchResults(data)
-            setShowDropdown(true)
-          }
-        } catch (error) {
-          console.error("Помилка пошуку", error)
-        }
-      } else {
-        setSearchResults([])
-        setShowDropdown(false)
-      }
-    }, 500)
 
-    return () => clearTimeout(delayDebounceFn)
-  }, [searchQuery, authFetch])
-
-  const handleSelectAndAdd = async (title, type, imdbID) => {
-    setShowDropdown(false)
-    setSearchQuery('')
-    setIsLoading(true)
-
-    console.log("Відправляємо на бекенд:", { title, type, imdb_id: imdbID });
-
-    try {
-      const response = await authFetch('/api/media/add/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: title, media_type: type === 'series' ? 'series' : 'movie', imdb_id: imdbID })
-      })
-
-      const data = await response.json()
-      if (response.ok) {
-        showToast('Тайтл успішно додано до вашого списку!', 'success')
-        fetchMyList() 
-      } else if (response.status === 200){
-        showToast('Цей тайтл вже є у вашому списку.', 'error')
-      }else {
-        showToast('Сталася помилка при додаванні.', 'error')
-      }
-    } catch (error) {
-      showToast('Помилка з\'єднання з сервером', 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const fetchMyList = useCallback(async(loadMoreUrl = null) => {
         if (loadMoreUrl){
@@ -150,12 +93,19 @@ function UserList(){
           }
         }, [authFetch, activeFilter, sortOrder])
 
-
     useEffect(() => {
-      if (token) {
+        if (token) {
+            fetchMyList()
+        }
+    }, [token, fetchMyList])
+    
+    useEffect(() => {
+      const handleMediaAdded = () => {
         fetchMyList()
       }
-    }, [token, fetchMyList])
+      window.addEventListener('mediaAdded', handleMediaAdded)
+      return () => window.removeEventListener('mediaAdded', handleMediaAdded)
+    }, [fetchMyList])
 
     const handleLoadMore = () => {
       if(nextPageUrl){
@@ -165,6 +115,7 @@ function UserList(){
 
 
   const handleUpdateMedia = async (id, newStatus, newScore) => {
+  setMediaList(prevList => prevList.map(item => item.id === id ? {...item, status: newStatus, score: newScore} : item))
   try {
     const response = await authFetch(
       `/api/media/update/${id}/`,
@@ -181,12 +132,13 @@ function UserList(){
     )
 
     if (response.ok) {
-      fetchMyList()
     } else {
       showToast('Помилка оновлення', 'error')
+      fetchMyList()
     }
   } catch (error) {
     showToast("Помилка з'єднання", 'error')
+    fetchMyList()
   }
 }
 
@@ -196,6 +148,7 @@ function UserList(){
     const typeText = isSeries ? 'Серіал' : 'Фільм'
     if (!window.confirm(`Дійсно видалити цей ${typeText.toLowerCase()} зі списку?`)) return;
 
+    setMediaList(prevList => prevList.filter(item => item.id !== id))
     try {
       const response = await authFetch(`/api/media/delete/${id}/`, {
         method: 'DELETE',
@@ -206,9 +159,11 @@ function UserList(){
         showToast(`${typeText} видалено`, 'info');
       } else {
         showToast('Помилка видалення', 'error');
+        fetchMyList()
       }
     } catch (error) {
       showToast('Помилка з\'єднання', 'error');
+      fetchMyList()
     }
   }
 
@@ -216,50 +171,6 @@ function UserList(){
         <div className="home-wrapper">
             <div className="app-container" style={{ position: 'relative', zIndex: 1, paddingTop: '30px', paddingBottom: '50px' }}>
 
-                {/* === БЛОК ПОШУКУ === */}
-                <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    <input 
-                        type="text" 
-                        className="search-input-glass"
-                        placeholder="Пошук фільмів та серіалів..." 
-                        value={searchQuery} 
-                        onChange={(e) => setSearchQuery(e.target.value)} 
-                        onFocus={() => { if(searchResults.length > 0) setShowDropdown(true) }}
-                        disabled={isLoading && mediaList.length === 0}
-                        style={{ paddingRight: '45px', width: '100%' }} 
-                    />
-
-                    {searchQuery && (
-                        <span 
-                            onClick={() => { setSearchQuery(''); setSearchResults([]); setShowDropdown(false); }}
-                            className="search-clear-btn"
-                            title="Очистити пошук"
-                        >✖</span>
-                    )}
-
-                    {showDropdown && searchResults.length > 0 && (
-                        <div className="search-dropdown glass-dropdown">
-                            {searchResults.map(item => (
-                                <div key={item.imdbID} className="search-item" onClick={() => handleSelectAndAdd(item.Title, item.Type, item.imdbID)}>
-                                    <img 
-                                        src={getPosterUrl(item.Poster)} 
-                                        alt="poster" 
-                                        onError={(e) => {e.target.onerror = null; e.target.src = 'https://placehold.co/40x60?text=No+Poster'}}
-                                        style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '16px' }} 
-                                    />
-                                    <div>
-                                        <strong style={{ display: 'block', fontSize: '1.1rem' }}>{item.Title} ({item.Year})</strong>
-                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                            {item.Type === 'series' ? '📺 Серіал' : '🎬 Фільм'}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-               {/* === ПАНЕЛЬ ФІЛЬТРІВ ТА СОРТУВАННЯ === */}
                 <div className="filters-sort-row">
                     {[
                         { id: 'all', label: 'Усі' },
@@ -272,7 +183,7 @@ function UserList(){
                     ].map(filter => (
                         <button
                             key={filter.id}
-                            onClick={() => setActiveFilter(filter.id)} // Просто міняємо стейт, useEffect зробить решту
+                            onClick={() => setActiveFilter(filter.id)}
                             className={`filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                         >
                             {filter.label}
@@ -323,6 +234,8 @@ function UserList(){
                                         <img
                                             className="media-poster"
                                             src={getPosterUrl(item.media_item?.poster_url)}
+                                            loading='lazy'
+                                            decoding='async'
                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x600?text=No+Poster'}}
                                             alt={item.media_item?.title}
                                         />

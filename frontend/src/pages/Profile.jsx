@@ -312,7 +312,6 @@ export default function Profile() {
         <div className="profile-wrapper">
             <div className="profile-dashboard app-container" style={{ position: 'relative', zIndex: 1 }}>
                 
-                {/* ШАПКА З ДИНАМІЧНИМ ФОНОМ (ДОДАНО glass-card) */}
                 <div className="profile-header-card glass-card">
                     {masterpieces.length > 0 && (
                         <div className="dynamic-bg">
@@ -352,7 +351,7 @@ export default function Profile() {
                     <h2 style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Аналізуємо ваш профіль...</h2>
                 ) : (
                     <>
-                   {/* === КРУГОВА ДІАГРАМА (ЖАНРИ) === */}
+
                         {totalGenreTags > 0 && (
                             <div className="chart-container glass-card">
                                 <h3 className="chart-title">Аналітика жанрів</h3>

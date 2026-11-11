@@ -10,7 +10,7 @@ const NotFound = () => {
             <p className="not-found-text">
                 Схоже, ти заблукав. Такого посилання в нашому трекері не існує, або сторінку було видалено.
             </p>
-            <button className="btn nav btn-nav-primary" onClick={() => navigate('/')}>
+            <button className="btn-back-modern" onClick={() => navigate('/')}>
                 ← Повернутися на головну
             </button>
         </div>
