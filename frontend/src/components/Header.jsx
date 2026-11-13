@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext'
 import { useState, useEffect } from 'react'
 import { API_BASE_URL } from '../config'
+import ConfirmModal from './ConfirmModal'
 
 export default function Header({ isSimple = false}){
     const { authFetch, logout, token } = useAuth()
@@ -11,13 +12,15 @@ export default function Header({ isSimple = false}){
     const { showToast } = useToast()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState([])
     const [showDropdown, setShowDropdown] = useState(false)
     const [isSearching, setIsSearching] = useState(false)
 
-    const handleLogout = () => {
+    const handleLogoutConfirm = () => {
+        setIsLogoutModalOpen(false)
         logout()
         showToast('Ви вийшли з системи.', 'info')
         navigate("/", {replace: true})   
@@ -55,7 +58,7 @@ export default function Header({ isSimple = false}){
             if(searchQuery.trim().length >= 3) {
                 setIsSearching(true)
                 try{
-                    const response = await authFetch(`/api/media/search/?q=${searchQuery}`)
+                    const response = await authFetch(`/api/catalog/search/?q=${searchQuery}`)
                     if(response.ok){
                         const data = await response.json()
                         setSearchResults(data)
@@ -97,7 +100,7 @@ export default function Header({ isSimple = false}){
             })
             if (response.ok){
                 showToast('Тайтл успішно додано до вашого списку!', 'success')
-                if(location.pathname === '/list' || location.pathname === '/'){
+                if(location.pathname === '/my-list' || location.pathname === '/'){
                     window.dispatchEvent(new Event('mediaAdded'))
                 }
             } else if(response.status === 200){
@@ -110,6 +113,7 @@ export default function Header({ isSimple = false}){
         }
     }
 return (
+    <>
         <header className="app-header">
             
             <Link to="/" className="header-logo" onClick={closeMenu}>
@@ -166,8 +170,8 @@ return (
 
                     <nav className={`header-nav ${isMenuOpen ? 'mobile-open' : ''}`}>
                         <Link 
-                            to="/list" 
-                            className={`btn-nav ${isActive('/list') || isActive('/catalog') ? 'active-link' : ''}`}
+                            to="/my-list" 
+                            className={`btn-nav ${isActive('/my-list') || isActive('/catalog') ? 'active-link' : ''}`}
                             onClick={closeMenu}
                         >
                             Мій список
@@ -194,12 +198,24 @@ return (
                             <span className="profile-text-mobile">Профіль</span>
                         </Link>
 
-                        <button onClick={handleLogout} className="btn-nav btn-logout">
+                        <button onClick={() => {closeMenu, setIsLogoutModalOpen(true)}} className="btn-nav btn-logout">
                             Вихід
                         </button>
                     </nav>
                 </>
             )}
-        </header>
+             </header>
+
+            <ConfirmModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogoutConfirm}
+                title="Вихід з системи"
+                confirmText="Так, вийти"
+                confirmType="danger"
+            >
+                Ви впевнені, що хочете вийти зі свого акаунта?
+            </ConfirmModal>
+        </>
     );
 }

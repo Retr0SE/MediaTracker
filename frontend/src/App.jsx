@@ -26,15 +26,15 @@ function App() {
       {showHeader && <Header isSimple={isAuthPath}/>}
 
       <Routes>
-        <Route path='/login' element={!isAuthenticated ? <LoginPage/> : <Navigate to='/list' replace />} />
-        <Route path='/register' element={!isAuthenticated ? <RegisterPage /> : <Navigate to='/list' replace />} />
+        <Route path='/login' element={!isAuthenticated ? <LoginPage/> : <Navigate to='/my-list' replace />} />
+        <Route path='/register' element={!isAuthenticated ? <RegisterPage /> : <Navigate to='/my-list' replace />} />
 
-        <Route path='/' element={!isAuthenticated ? <LandingPage/> : <Navigate to='/list' replace />} />
-        <Route path='/list' element={isAuthenticated ? <MyListPage/> : <Navigate to='/' replace />} />
+        <Route path='/' element={!isAuthenticated ? <LandingPage/> : <Navigate to='/my-list' replace />} />
+        <Route path='/my-list' element={isAuthenticated ? <MyListPage/> : <Navigate to='/' replace />} />
         <Route path='/friends' element={isAuthenticated ? <FriendsListPage/> : <Navigate to='/' replace />} />
         <Route path='/catalog/:id' element={isAuthenticated ? <MediaDetailsPage/> : <Navigate to='/' replace />} />
         <Route path='/profile' element={isAuthenticated ? <ProfilePage/> : <Navigate to='/' replace />} />
-        <Route path='/user/:id' element={isAuthenticated ? <FriendProfilePage/> : <Navigate to='/' replace />} />
+        <Route path='/users/:id' element={isAuthenticated ? <FriendProfilePage/> : <Navigate to='/' replace />} />
 
         <Route path='*' element={<NotFoundPage />}/>
       </Routes>

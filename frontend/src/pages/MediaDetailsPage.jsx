@@ -35,7 +35,7 @@ function MediaDetailsPage(){
 
     const fetchReviews = async () => {
         try {
-            const reviewsRes = await authFetch(`/api/media/catalog/${id}/reviews/`);
+            const reviewsRes = await authFetch(`/api/catalog/${id}/reviews/`);
             if (reviewsRes.ok) {
                 const reviewsData = await reviewsRes.json();
                 setReviews(reviewsData.results || []);
@@ -49,7 +49,7 @@ function MediaDetailsPage(){
     const fetchMediaData = useCallback(async () => {
         setIsLoading(true)
         try {
-            const response = await authFetch(`/api/media/catalog/${id}/`)
+            const response = await authFetch(`/api/catalog/${id}/`)
             if (response.ok) {
                 const data = await response.json()
                 setMovie(data)
@@ -61,7 +61,7 @@ function MediaDetailsPage(){
                 setMovie(null)
             }
 
-            const reviewsRes = await authFetch(`/api/media/catalog/${id}/reviews/`)
+            const reviewsRes = await authFetch(`/api/catalog/${id}/reviews/`)
             if (reviewsRes.ok) {
                 const reviewsData = await reviewsRes.json()
                 setReviews(reviewsData.results || [])
@@ -99,7 +99,7 @@ function MediaDetailsPage(){
         if (!movie) return;
         setIsAdding(true);
         try {
-            const response = await authFetch('/api/media/add/', {
+            const response = await authFetch('/api/add/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -111,7 +111,7 @@ function MediaDetailsPage(){
 
             if (response.ok) {
                 showToast('Успішно додано у ваші плани!', 'success');
-                fetchMediaData(); // Перезавантажуємо, щоб отримати currentItem
+                fetchMediaData();
             } else {
                 showToast('Помилка при додаванні', 'error');
             }
@@ -128,7 +128,7 @@ function MediaDetailsPage(){
         if (newReview !== undefined) bodyData.review = newReview
 
         try {
-            const response = await authFetch(`/api/media/update/${currentItem.id}/`, {
+            const response = await authFetch(`/api/update/${currentItem.id}/`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyData),
@@ -153,7 +153,7 @@ function MediaDetailsPage(){
     const handleDeleteMedia = async () => {
         if (!currentItem || !window.confirm('Ви впевнені, що хочете видалити цей тайтл зі свого списку?')) return;
         try {
-            const response = await authFetch(`/api/media/${currentItem.id}/delete/`, { method: 'DELETE' });
+            const response = await authFetch(`/api/${currentItem.id}/delete/`, { method: 'DELETE' });
             if (response.ok) {
                 showToast('Тайтл видалено', 'info');
                 setCurrentItem(null);

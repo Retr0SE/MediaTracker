@@ -783,7 +783,7 @@ input:focus {
 .card-badge-overlay {
     position: absolute;
     top: 12px;
-    right: 12px;
+    left: 12px;
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -908,51 +908,39 @@ input:focus {
     margin-top: 8px;
 }
 
-.btn-details {
-    flex: 1;
-    padding: 12px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    background: rgba(255, 255, 255, 0.03); 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--text-main);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px; 
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.btn-details:hover {
-    background: rgba(59, 130, 246, 0.85); 
-    color: #ffffff;
-    border-color: rgba(59, 130, 246, 1);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); 
-    transform: translateY(-2px);
-}
-
-.btn-delete {
-    width: 46px; 
-    height: 46px;
+.btn-delete-elegant {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(239, 68, 68, 0.05);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.15);
-    border-radius: 14px;
-    font-size: 1.2rem;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+    z-index: 10;
+    
+    opacity: 0; 
+    transform: scale(0.9);
 }
 
-.btn-delete:hover {
+.media-card-premium:hover .btn-delete-elegant {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.btn-delete-elegant:hover {
     background: rgba(239, 68, 68, 0.9);
-    color: #ffffff;
-    border-color: rgba(239, 68, 68, 1);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-    transform: translateY(-2px) rotate(90deg); 
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .btn-load-more {
@@ -2040,6 +2028,75 @@ input:focus {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+/* =========================================
+   CONFIRM MODAL
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-base {
+    background: var(--card-bg); 
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+    margin: 0 0 12px 0;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-text {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-modal {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s ease;
+}
+
+.btn-modal.danger {
+    background: var(--danger);
+    color: white;
+}
+.btn-modal.danger:hover {
+    background: #dc2626;
+}
+
+.btn-modal.cancel {
+    background: var(--border-light);
+    color: var(--text-main);
+}
+.btn-modal.cancel:hover {
+    background: var(--border-strong);
 }
 
 /* =========================================

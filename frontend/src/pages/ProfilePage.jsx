@@ -68,7 +68,7 @@ export default function ProfilePage() {
         const fetchMyList = async () => {
             try {
                 const [listResponse, userResponse] = await Promise.all([
-                    authFetch('/api/media/my-list/all/'),
+                    authFetch('/api/my-list/all/'),
                     authFetch('/api/users/profile/')
                 ]);
 

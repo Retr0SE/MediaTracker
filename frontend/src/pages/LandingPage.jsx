@@ -44,7 +44,7 @@ export default function LandingPage() {
                 <div className="ml-nav-logo">KINEMIO</div>
                 <div className="ml-nav-links">
                     {isAuthenticated ? (
-                        <Link to="/list" className="ml-button ml-button-small">Моя колекція</Link>
+                        <Link to="/my-list" className="ml-button ml-button-small">Моя колекція</Link>
                     ) : (
                         <Link to="/login" className="ml-login">Увійти в акаунт</Link>
                     )}
@@ -70,7 +70,7 @@ export default function LandingPage() {
                             </p>
                             <div className="ml-hero-actions">
                                 {isAuthenticated ? (
-                                    <Link to="/list" className="ml-button">Відкрити медіатеку <span>↗</span></Link>
+                                    <Link to="/my-list" className="ml-button">Відкрити медіатеку <span>↗</span></Link>
                                 ) : (
                                     <>
                                         <Link to="/register" className="ml-button">Створити акаунт</Link>

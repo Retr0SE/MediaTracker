@@ -89,3 +89,4 @@ class UserDetailAPIView(generics.RetrieveAPIView):
     serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
+    lookup_url_kwarg = 'user_id'

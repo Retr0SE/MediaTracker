@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { API_BASE_URL } from '../config'
+import ConfirmModal from '../components/ConfirmModal'
 
 
 function MyListPage(){
@@ -17,6 +18,8 @@ function MyListPage(){
 
   const { showToast } = useToast()
   const navigate = useNavigate()
+
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, itemId: null, title: '', type: ''})
 
   const getPosterUrl = (url) => {
         if (!url || url === 'N/A')return 'https://placehold.co/400x600?text=No+Poster'
@@ -71,7 +74,7 @@ function MyListPage(){
               if (sortMap[sortOrder]){
                 params.append('ordering', sortMap[sortOrder])
               }
-              url = `/api/media/my-list/?${params.toString()}`
+              url = `/api/my-list/?${params.toString()}`
             }
             const response = await authFetch(url)
             if (response.ok){
@@ -118,7 +121,7 @@ function MyListPage(){
   setMediaList(prevList => prevList.map(item => item.id === id ? {...item, status: newStatus, score: newScore} : item))
   try {
     const response = await authFetch(
-      `/api/media/update/${id}/`,
+      `/api/update/${id}/`,
       {
         method: 'PATCH',
         headers: {
@@ -142,21 +145,27 @@ function MyListPage(){
   }
 }
 
-  const handleDeleteMedia = async (id) => {
-    const itemToDelete = mediaList.find(i => i.id === id)
-    const isSeries = itemToDelete?.media_item?.media_type === "series"
-    const typeText = isSeries ? 'Серіал' : 'Фільм'
-    if (!window.confirm(`Дійсно видалити цей ${typeText.toLowerCase()} зі списку?`)) return;
-
-    setMediaList(prevList => prevList.filter(item => item.id !== id))
+  const openDeleteModal = (item) => {
+    const isSeries = item.media_item?.media_type === "series"
+    setDeleteModal({
+      isOpen: true, 
+      itemId: item.id,
+      title: item.media_item?.title || "Цей тайтл",
+      type: isSeries ? "серіал" : 'фільм'
+    })
+  }
+  const confirmDelete = async () => {
+    const {itemId, type} =  deleteModal
+    setDeleteModal({isOpen: false, itemId: null, title: '', type: ''})
+    setMediaList(prevList => prevList.filter(item => item.id !== itemId))
     try {
-      const response = await authFetch(`/api/media/delete/${id}/`, {
+      const response = await authFetch(`/api/delete/${itemId}/`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
         fetchMyList();
-        showToast(`${typeText} видалено`, 'info');
+        showToast(`${type === 'серіал' ? 'Серіал' : 'Фільм'} видалено`, 'info');
       } else {
         showToast('Помилка видалення', 'error');
         fetchMyList()
@@ -193,7 +202,7 @@ function MyListPage(){
                     <select 
                         className="status-select top-sort-select"
                         value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)} // Просто міняємо стейт
+                        onChange={(e) => setSortOrder(e.target.value)}
                     >
                         <option value="default">За датою додавання</option>
                         <option value="title_asc">За алфавітом (А-Я)</option>
@@ -205,7 +214,6 @@ function MyListPage(){
                     </select>
                 </div>
                 
-                {/* === СІТКА КАРТОК === */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '24px' }}>
                     {isLoading && !isFetchingMore ? (
                         Array.from({ length: 8 }).map((_, index) => (
@@ -230,7 +238,10 @@ function MyListPage(){
                             const displayType = item.media_item?.media_type === 'series' ? '📺 Серіал' : '🎬 Фільм';
                             return (
                                 <div key={item.id} className="media-card-premium glass-card">
-                                    <div className="card-poster-wrapper">
+                                    <div className="card-poster-wrapper"
+                                      onClick={() => navigate(`/catalog/${item.media_item.id}`)}
+                                      style={{ cursor: 'pointer'}}
+                                      >
                                         <img
                                             className="media-poster"
                                             src={getPosterUrl(item.media_item?.poster_url)}
@@ -240,10 +251,25 @@ function MyListPage(){
                                             alt={item.media_item?.title}
                                         />
                                         <div className="card-badge-overlay">{displayType}</div>
+                                        <button 
+                                          className="btn-delete-elegant"
+                                          onClick={(e) => {
+                                              e.stopPropagation(); 
+                                              openDeleteModal(item);
+                                          }}
+                                          title="Видалити зі списку"
+                                      >
+                                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                                          </svg>
+                                      </button>
                                     </div>
                                     
                                     <div className="media-content">
-                                        <h3 className="media-title" title={item.media_item?.title}>
+                                        <h3 className="media-title" title={item.media_item?.title}
+                                            onClick={() => navigate(`catalog/${item.media_item.id}`)}
+                                            style={{cursor: 'pointer'}}>
                                             {item.media_item?.title || 'Невідомий тайтл'}
                                         </h3>
                                         
@@ -278,15 +304,6 @@ function MyListPage(){
                                                 ))}
                                             </div>
                                         </div>
-
-                                        <div className="actions-container">
-                                            <button className="btn-details" onClick={() => navigate(`/catalog/${item.media_item.id}`)}>
-                                                Деталі
-                                            </button>
-                                            <button className="btn-delete" onClick={() => handleDeleteMedia(item.id)} title="Видалити">
-                                                ✖
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
                             );
@@ -307,6 +324,17 @@ function MyListPage(){
                     </div>
                 )}
             </div>
+            <ConfirmModal
+            isOpen={deleteModal.isOpen}
+            onClose={() => setDeleteModal({isOpen: false, itemId: null, title: '', type: ''})}
+            onConfirm={confirmDelete}
+            confirmText='Ок'
+            confirmType='danger'
+            >
+              Ви впевнені що хочете видалити {deleteModal.type} <br />
+              <strong style={{color: 'white'}}>"{deleteModal.title}"</strong> <br />
+              зі свого списку?
+            </ConfirmModal>
         </div>
     );
 }

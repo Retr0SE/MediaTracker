@@ -48,7 +48,7 @@ const FriendProfilePage = () => {
                 const profileRes = await authFetch(`/api/users/${id}/`);
                 if (profileRes.ok) setProfile(await profileRes.json());
 
-                const mediaRes = await authFetch(`/api/media/user/${id}/list/`);
+                const mediaRes = await authFetch(`/api/users/${id}/media/`);
                 if (mediaRes.ok) {
                     const mediaData = await mediaRes.json();
                     if (mediaData.results){

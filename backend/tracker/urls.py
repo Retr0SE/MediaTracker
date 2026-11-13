@@ -14,9 +14,9 @@ urlpatterns = [
     path('update/<int:pk>/', UpdateMediaAPIView.as_view(), name='media-update'),
     path('delete/<int:pk>/', DeleteMediaAPIView.as_view(), name='media-delete'),
 
-    path('search/', LiveSearchAPIView.as_view(), name='media-search'),
+    path('catalog/search/', LiveSearchAPIView.as_view(), name='media-search'),
     path('catalog/<int:pk>/', UniversalMediaDetailAPIView.as_view(), name='catalog-detail'),
     path('catalog/<int:media_item_id>/reviews/', MediaReviewAPIView.as_view(), name='catalog-reviews'),
 
-    path('user/<int:user_id>/list/', FriendMediaAPIList.as_view(), name='friend-list'),
+    path('users/<int:user_id>/media/', FriendMediaAPIList.as_view(), name='friend-list'),
 ]
