@@ -172,7 +172,7 @@ const FriendProfilePage = () => {
                                 <div 
                                     key={item.id} 
                                     className="media-card-premium glass-card friend-media-card"
-                                    onClick={() => navigate(`/catalog/${media.id}`)}
+                                    onClick={() => navigate(`/title/${media.id}`)}
                                     style={{ cursor: 'pointer', transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.02)' } }}
                                 >
                                     

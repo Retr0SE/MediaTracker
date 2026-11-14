@@ -137,7 +137,7 @@ const FriendsListPage = () => {
                             <div key={user.id} className="glass-card friend-row-card">
                                 
                                 <div className="friend-avatar-wrapper">
-                                    <Link to={`/user/${user.id}`}>
+                                    <Link to={`/users/${user.id}`}>
                                         <img 
                                             src={getAvatarUrl(user.avatar)} 
                                             alt={user.username} 
@@ -147,7 +147,7 @@ const FriendsListPage = () => {
                                 </div>
                                 
                                 <div className="friend-info">
-                                    <Link to={`/user/${user.id}`} style={{ textDecoration: 'none' }}>
+                                    <Link to={`/users/${user.id}`} style={{ textDecoration: 'none' }}>
                                         <h3 className="friend-username">{user.username}</h3>
                                     </Link>
                                     <p className="friend-status">

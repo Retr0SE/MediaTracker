@@ -436,7 +436,7 @@ export default function ProfilePage() {
                                         <div 
                                             className="record-card glass-card"
                                             style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/catalog/${(oldestMedia.media_item || oldestMedia.media).id}`)}>
+                                            onClick={() => navigate(`/title/${(oldestMedia.media_item || oldestMedia.media).id}`)}>
                                             <img src={(oldestMedia.media_item || oldestMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label">Найдревніший тайтл</div>
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                                     {longestMedia && (
                                         <div className="record-card glass-card" 
                                             style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/catalog/${(longestMedia.media_item || longestMedia.media).id}`)}>
+                                            onClick={() => navigate(`/title/${(longestMedia.media_item || longestMedia.media).id}`)}>
                                             <img src={(longestMedia.media_item || longestMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label">Найдовший тайтл</div>
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                                         <div 
                                             className="record-card glass-card"     
                                             style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/catalog/${(epicSeries.media_item || epicSeries.media).id}`)}>
+                                            onClick={() => navigate(`/title/${(epicSeries.media_item || epicSeries.media).id}`)}>
                                             <img src={(epicSeries.media_item || epicSeries.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--accent-blue)' }}>Серіальний епік</div>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                                         <div 
                                             className="record-card glass-card" 
                                             style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/catalog/${(topImdbMedia.media_item || topImdbMedia.media).id}`)}>
+                                            onClick={() => navigate(`/title/${(topImdbMedia.media_item || topImdbMedia.media).id}`)}>
                                             <img src={(topImdbMedia.media_item || topImdbMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--accent-star, #fbbf24)' }}>Фаворит IMDb</div>
@@ -491,7 +491,7 @@ export default function ProfilePage() {
                                         <div 
                                             className="record-card glass-card" 
                                             style={{ display: 'flex', flexDirection: 'row', padding: 0, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/catalog/${(worstMedia.media_item || worstMedia.media).id}`)}>
+                                            onClick={() => navigate(`/title/${(worstMedia.media_item || worstMedia.media).id}`)}>
                                             <img src={(worstMedia.media_item || worstMedia.media).poster_url} alt="poster" className="record-poster" />
                                             <div className="record-info">
                                                 <div className="record-label" style={{ color: 'var(--danger)' }}>Найбільше розчарування</div>

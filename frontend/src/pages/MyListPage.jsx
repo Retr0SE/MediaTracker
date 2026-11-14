@@ -239,7 +239,7 @@ function MyListPage(){
                             return (
                                 <div key={item.id} className="media-card-premium glass-card">
                                     <div className="card-poster-wrapper"
-                                      onClick={() => navigate(`/catalog/${item.media_item.id}`)}
+                                      onClick={() => navigate(`/title/${item.media_item.id}`)}
                                       style={{ cursor: 'pointer'}}
                                       >
                                         <img
@@ -268,7 +268,7 @@ function MyListPage(){
                                     
                                     <div className="media-content">
                                         <h3 className="media-title" title={item.media_item?.title}
-                                            onClick={() => navigate(`catalog/${item.media_item.id}`)}
+                                            onClick={() => navigate(`/title/${item.media_item.id}`)}
                                             style={{cursor: 'pointer'}}>
                                             {item.media_item?.title || 'Невідомий тайтл'}
                                         </h3>

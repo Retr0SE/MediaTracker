@@ -12,6 +12,7 @@ export default function Header({ isSimple = false}){
     const { showToast } = useToast()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
     const [searchQuery, setSearchQuery] = useState('')
@@ -86,6 +87,16 @@ export default function Header({ isSimple = false}){
         document.addEventListener('click', handleClickOutside)
         return () => document.removeEventListener('click', handleClickOutside)
     }, [])
+    useEffect(() => {
+        if(isMobileSearchOpen || isMenuOpen){
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [isMobileSearchOpen, isMenuOpen])
 
     const handleSelectAndAdd = async (title, type, imdbID ) => {
         setShowDropdown(false)
@@ -115,14 +126,15 @@ export default function Header({ isSimple = false}){
 return (
     <>
         <header className="app-header">
-            
-            <Link to="/" className="header-logo" onClick={closeMenu}>
-                <span className="header-logo-text">KINEMIO</span>
-            </Link>
-            
-            {!isSimple && token && (
-                <>
-                    <div className="header-search-wrapper">
+            {isMobileSearchOpen ? (
+                <div className="mobile-search-active-container">
+                    <button className="btn-close-mobile-search" onClick={() => setIsMobileSearchOpen(false)}>
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </button>
+                    <div className="header-search-wrapper mobile-active">
                         <input 
                             type="text" 
                             className="search-input-glass header-search-input"
@@ -130,81 +142,107 @@ return (
                             value={searchQuery} 
                             onChange={(e) => setSearchQuery(e.target.value)} 
                             onFocus={() => { if(searchResults.length > 0) setShowDropdown(true) }}
+                            autoFocus
                         />
-
-
                         {searchQuery && (
-                        <span 
-                            onClick={() => { setSearchQuery(''); setSearchResults([]); setShowDropdown(false); }}
-                            className="search-clear-btn"
-                            title="Очистити пошук"
-                        >✖</span>
-                    )}
-
+                            <span 
+                                onClick={() => { setSearchQuery(''); setSearchResults([]); setShowDropdown(false); }}
+                                className="search-clear-btn"
+                                title="Очистити пошук"
+                            >✖</span>
+                        )}
                         {showDropdown && searchResults.length > 0 && (
                             <div className="search-dropdown glass-dropdown">
                                 {searchResults.map(item => (
                                     <div key={item.imdbID} className="search-item" onClick={() => handleSelectAndAdd(item.Title, item.Type, item.imdbID)}>
-                                        <img
-                                            src={getPosterUrl(item.Poster)} 
-                                            alt="poster" 
-                                            className="search-item-poster"
-                                        />
+                                        <img src={getPosterUrl(item.Poster)} alt="poster" className="search-item-poster" />
                                         <div>
                                             <strong className="search-item-title">{item.Title} ({item.Year})</strong>
-                                            <span className="search-item-type">
-                                                {item.Type === 'series' ? '📺 Серіал' : '🎬 Фільм'}
-                                            </span>
+                                            <span className="search-item-type">{item.Type === 'series' ? '📺 Серіал' : '🎬 Фільм'}</span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
+                </div>
+            ) : (
+                <>
+                    <Link to="/" className="header-logo" onClick={closeMenu}>
+                        <span className="header-logo-text">KINEMIO</span>
+                    </Link>
+                    
+                    {!isSimple && token && (
+                        <>
+                            <div className="header-search-wrapper desktop-only">
+                                <input 
+                                    type="text" 
+                                    className="search-input-glass header-search-input"
+                                    placeholder="Знайти фільм..." 
+                                    value={searchQuery} 
+                                    onChange={(e) => setSearchQuery(e.target.value)} 
+                                    onFocus={() => { if(searchResults.length > 0) setShowDropdown(true) }}
+                                />
+                                {searchQuery && (
+                                    <span 
+                                        onClick={() => { setSearchQuery(''); setSearchResults([]); setShowDropdown(false); }}
+                                        className="search-clear-btn"
+                                        title="Очистити пошук"
+                                    >✖</span>
+                                )}
+                                {showDropdown && searchResults.length > 0 && (
+                                    <div className="search-dropdown glass-dropdown">
+                                        {searchResults.map(item => (
+                                            <div key={item.imdbID} className="search-item" onClick={() => handleSelectAndAdd(item.Title, item.Type, item.imdbID)}>
+                                                <img src={getPosterUrl(item.Poster)} alt="poster" className="search-item-poster" />
+                                                <div>
+                                                    <strong className="search-item-title">{item.Title} ({item.Year})</strong>
+                                                    <span className="search-item-type">{item.Type === 'series' ? '📺 Серіал' : '🎬 Фільм'}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
-                    <button className={`burger-btn ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}>
-                        <span className="burger-line"></span>
-                        <span className="burger-line"></span>
-                        <span className="burger-line"></span>
-                    </button>
+                            <div className="mobile-header-controls">
+                                <button className="btn-mobile-search" onClick={() => setIsMobileSearchOpen(true)}>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </button>
+                                
+                                <button className={`burger-btn ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}>
+                                    <span className="burger-line"></span>
+                                    <span className="burger-line"></span>
+                                    <span className="burger-line"></span>
+                                </button>
+                            </div>
 
-                    <nav className={`header-nav ${isMenuOpen ? 'mobile-open' : ''}`}>
-                        <Link 
-                            to="/my-list" 
-                            className={`btn-nav ${isActive('/my-list') || isActive('/catalog') ? 'active-link' : ''}`}
-                            onClick={closeMenu}
-                        >
-                            Мій список
-                        </Link>
-                        
-                        <Link 
-                            to="/friends" 
-                            className={`btn-nav ${isActive('/friends') || isActive('/user') ? 'active-link' : ''}`}
-                            onClick={closeMenu}
-                        >
-                            Друзі
-                        </Link>
-                        
-                        <Link 
-                            to="/profile" 
-                            className={`btn-nav profile-icon-link ${isActive('/profile') ? 'active-link' : ''}`}
-                            onClick={closeMenu}
-                            title="Мій профіль"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <span className="profile-text-mobile">Профіль</span>
-                        </Link>
-
-                        <button onClick={() => {closeMenu, setIsLogoutModalOpen(true)}} className="btn-nav btn-logout">
-                            Вихід
-                        </button>
-                    </nav>
+                            <nav className={`header-nav ${isMenuOpen ? 'mobile-open' : ''}`}>
+                                <Link to="/my-list" className={`btn-nav ${isActive('/my-list') || isActive('/catalog') ? 'active-link' : ''}`} onClick={closeMenu}>
+                                    Мій список
+                                </Link>
+                                <Link to="/friends" className={`btn-nav ${isActive('/friends') || isActive('/user') ? 'active-link' : ''}`} onClick={closeMenu}>
+                                    Друзі
+                                </Link>
+                                <Link to="/profile" className={`btn-nav profile-icon-link ${isActive('/profile') ? 'active-link' : ''}`} onClick={closeMenu} title="Мій профіль">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span className="profile-text-mobile">Профіль</span>
+                                </Link>
+                                <button onClick={() => { closeMenu(); setIsLogoutModalOpen(true); }} className="btn-nav btn-logout">
+                                    Вихід
+                                </button>
+                            </nav>
+                        </>
+                    )}
                 </>
             )}
-             </header>
+        </header>
 
             <ConfirmModal
                 isOpen={isLogoutModalOpen}

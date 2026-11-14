@@ -32,7 +32,7 @@ function App() {
         <Route path='/' element={!isAuthenticated ? <LandingPage/> : <Navigate to='/my-list' replace />} />
         <Route path='/my-list' element={isAuthenticated ? <MyListPage/> : <Navigate to='/' replace />} />
         <Route path='/friends' element={isAuthenticated ? <FriendsListPage/> : <Navigate to='/' replace />} />
-        <Route path='/catalog/:id' element={isAuthenticated ? <MediaDetailsPage/> : <Navigate to='/' replace />} />
+        <Route path='/title/:id' element={isAuthenticated ? <MediaDetailsPage/> : <Navigate to='/' replace />} />
         <Route path='/profile' element={isAuthenticated ? <ProfilePage/> : <Navigate to='/' replace />} />
         <Route path='/users/:id' element={isAuthenticated ? <FriendProfilePage/> : <Navigate to='/' replace />} />
 

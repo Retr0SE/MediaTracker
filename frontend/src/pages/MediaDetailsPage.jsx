@@ -399,7 +399,7 @@ function MediaDetailsPage(){
                                             src={getAvatarUrl(review.user_avatar)} 
                                             alt={review.username}
                                             onClick={() =>{
-                                                if (!review.is_mine) navigate(`/user/${review.user_id}`)
+                                                if (!review.is_mine) navigate(`/users/${review.user_id}`)
                                             }}
                                             style={{ 
                                                 width: '50px', 
@@ -417,7 +417,7 @@ function MediaDetailsPage(){
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                                                     <h3 
                                                         onClick={() =>{
-                                                            if(!review.is_mine) navigate(`/user/${review.user_id}`)
+                                                            if(!review.is_mine) navigate(`/users/${review.user_id}`)
                                                         }}
                                                         style={{ 
                                                             margin: 0, 
