@@ -104,7 +104,7 @@ export default function Header({ isSimple = false}){
         closeMenu()
 
         try{
-            const response = await authFetch('/api/media/add/', {
+            const response = await authFetch('/api/add/', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ title, media_type: type === 'series' ? 'series' : 'movie', imdb_id: imdbID})

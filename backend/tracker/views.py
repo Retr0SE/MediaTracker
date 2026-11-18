@@ -1,4 +1,3 @@
-# 1. Сторонні бібліотеки (Third-party imports)
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -134,7 +133,6 @@ class UpdateMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
-        # Використовуємо get_object_or_404 для чистоти коду
         user_media = get_object_or_404(UserMedia, id=pk, user=request.user)
 
         new_status = request.data.get('status')
@@ -156,7 +154,6 @@ class DeleteMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        # Використовуємо get_object_or_404 замість try...except
         media_to_delete = get_object_or_404(UserMedia, id=pk, user=request.user)
         media_to_delete.delete()
         return Response({'message': 'The film has been removed.'}, status=status.HTTP_204_NO_CONTENT)

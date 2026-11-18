@@ -27,7 +27,7 @@ const Footer = () => {
             </div>
             
             <div className="footer-bottom">
-                <p>&copy; {new Date().getFullYear()} My Media Tracker. Всі права захищено.</p>
+                <p>&copy; {new Date().getFullYear()} KINEMIO. Всі права захищено.</p>
             </div>
         </footer>
     );
