@@ -13,6 +13,8 @@ from .models import UserMedia, MediaItem
 from .serializers import UserMediaSerializer, ReviewSerializer, UniversalMediaDetailSerializer
 from .utils import fetch_omdb_info
 
+from drf_spectacular.utils import extend_schema
+
 
 class NullsLastOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
@@ -27,7 +29,7 @@ class NullsLastOrderingFilter(filters.OrderingFilter):
             return queryset.order_by(*f_ordering)
         return queryset
 
-
+@extend_schema(tags=['Catalog'], summary='Пошук медіа')
 class LiveSearchAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -52,7 +54,7 @@ class LiveSearchAPIView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@extend_schema(tags=['Tracker'], summary='Список медіа користувача')
 class UserMediaListAPIView(generics.ListAPIView):
     serializer_class = UserMediaSerializer
     permission_classes = [IsAuthenticated]
@@ -64,9 +66,8 @@ class UserMediaListAPIView(generics.ListAPIView):
     def get_queryset(self):
         return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
 
-
+@extend_schema(tags=['Tracker'], summary='Повний список медіа користувача')
 class UserMediaAllAPIView(generics.ListAPIView):
-    """Список без пагінації (наприклад, для експорту чи дашборду)"""
     serializer_class = UserMediaSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = None
@@ -74,7 +75,7 @@ class UserMediaAllAPIView(generics.ListAPIView):
     def get_queryset(self):
         return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
 
-
+@extend_schema(tags=['Tracker'], summary='Деталі медіа')
 class UserMediaDetailAPIView(generics.RetrieveAPIView):
     serializer_class = UserMediaSerializer
     permission_classes = [IsAuthenticated]
@@ -82,7 +83,7 @@ class UserMediaDetailAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
 
-
+@extend_schema(tags=['Tracker'], summary='Додати медіа до списку')
 class AddMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -128,7 +129,7 @@ class AddMediaAPIView(APIView):
             
         return Response({'message': "Media not found in OMDb."}, status=status.HTTP_404_NOT_FOUND)
 
-
+@extend_schema(tags=['Tracker'], summary='Оновити дані медіа')
 class UpdateMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -149,7 +150,7 @@ class UpdateMediaAPIView(APIView):
         user_media.save()
         return Response({'message': 'Successfully updated!'})
 
-
+@extend_schema(tags=['Tracker'], summary='Видалити медіа зі списку')
 class DeleteMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -159,13 +160,13 @@ class DeleteMediaAPIView(APIView):
         return Response({'message': 'The film has been removed.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-
+@extend_schema(tags=['Catalog'], summary='Детальна інформація про медіа')
 class UniversalMediaDetailAPIView(generics.RetrieveAPIView):
     queryset = MediaItem.objects.all()
     serializer_class = UniversalMediaDetailSerializer
     permission_classes = [IsAuthenticated]
 
-
+@extend_schema(tags=['Users'], summary='Список медіа іншого користувача')
 class FriendMediaAPIList(generics.ListAPIView):
     serializer_class = UserMediaSerializer
     permission_classes = [IsAuthenticated]
@@ -190,7 +191,7 @@ class FriendMediaAPIList(generics.ListAPIView):
         cache.set(cache_key, response.data, timeout=900)
         return response
 
-
+@extend_schema(tags=['Catalog'], summary='Відгуки користувачів на медіа')
 class MediaReviewAPIView(generics.ListAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]

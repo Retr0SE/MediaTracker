@@ -13,14 +13,18 @@ from .models import Friendship
 from collections import Counter
 import datetime
 
+from drf_spectacular.utils import extend_schema
+
+
 User = get_user_model()
 
+@extend_schema(tags=['Auth'], summary='Реєстрація нового користувача')
 class RegisterAPIView(generics.CreateAPIView):
     queryset= User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
-
+@extend_schema(tags=['Users'], summary='Перегляд та редагування профілю')
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -50,6 +54,7 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         print("REDIS: User profile cache invalidated.")
         return response
 
+@extend_schema(tags=['Users'], summary='Пошук користувачів')
 class UserSearchAPIView(generics.ListAPIView):
     serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticated]
@@ -60,6 +65,7 @@ class UserSearchAPIView(generics.ListAPIView):
             return User.objects.filter(username__icontains=query).exclude(id=self.request.user.id)[:10]
         return User.objects.none()  
 
+@extend_schema(tags=['Users'], summary='Підписатися/відписатися на користувача')
 class ToggleFriendshipAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -78,7 +84,7 @@ class ToggleFriendshipAPIView(APIView):
             Friendship.objects.create(follower=request.user, following=user_to_follow)
             return Response({"status": "followed"}, status=status.HTTP_201_CREATED)
 
-
+@extend_schema(tags=['Users'], summary='Список друзів')
 class FollowedUserAPIView(generics.ListAPIView):
     serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticated]
@@ -87,7 +93,7 @@ class FollowedUserAPIView(generics.ListAPIView):
         followed_user_ids = Friendship.objects.filter(follower=self.request.user).values_list('following_id', flat=True)
         return User.objects.filter(id__in=followed_user_ids)
 
-
+@extend_schema(tags=['Users'], summary='Профіль іншого користувача')
 class UserDetailAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = PublicUserSerializer
@@ -95,7 +101,7 @@ class UserDetailAPIView(generics.RetrieveAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'user_id'
 
-
+@extend_schema(tags=['Users'], summary='Статистика користувача')
 class UserProfileStatsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

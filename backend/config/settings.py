@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'users',
     'rest_framework',
     'django_filters',
-    'corsheaders'
+    'corsheaders',
+    'drf_spectacular'
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -166,7 +167,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
-    ]
+    ], 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 SIMPLE_JWT = {
@@ -189,3 +191,19 @@ CACHES= {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'KINEMIO API',
+    'DESCRIPTION': 'Інтерактивна документація для бекенду медіа-трекера KINEMIO',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'TAGS': [
+            {'name': 'Auth', 'description': 'Реєстрація та JWT-авторизація'},
+            {'name': 'Tracker', 'description': 'Керування особистим списком медіа'},
+            {'name': 'Catalog', 'description': 'Пошук контенту та відгуки'},
+            {'name': 'Users', 'description': 'Профіль, статистика та підписки'},
+        ],
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    }
+    
+}
