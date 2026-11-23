@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.db.models import F, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, status, filters
+from rest_framework import generics, status, filters, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +13,7 @@ from .models import UserMedia, MediaItem
 from .serializers import UserMediaSerializer, ReviewSerializer, UniversalMediaDetailSerializer
 from .utils import fetch_omdb_info
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 
 class NullsLastOrderingFilter(filters.OrderingFilter):
@@ -83,7 +83,18 @@ class UserMediaDetailAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         return UserMedia.objects.filter(user=self.request.user).select_related('media_item')
 
-@extend_schema(tags=['Tracker'], summary='Додати медіа до списку')
+@extend_schema(
+    tags=['Tracker'],
+    summary='Додати медіа до списку',
+    request=inline_serializer(
+        name='AddMediaRequest',
+        fields={
+            'title': serializers.CharField(required=True, help_text='Назва фільму/медіа'),
+            'media_type': serializers.CharField(required=False, default='movie'),
+            'imdb_id': serializers.CharField(required=False, allow_blank=True),
+        }
+    ),
+)
 class AddMediaAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
