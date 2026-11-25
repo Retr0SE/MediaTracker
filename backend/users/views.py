@@ -1,28 +1,36 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from tracker.models import UserMedia
-from .serializers import RegisterSerializer, UserProfileSerializer, PublicUserSerializer, FriendshipSerializer
+from .serializers import (RegisterSerializer, UserProfileSerializer,
+PublicUserSerializer, FriendshipSerializer, UserRoleUpdateSerializer,
+UploadedFileSerializer)
 from django.core.cache import cache
 from django.db.models import Avg, Q
 from rest_framework.response import Response
-from .models import Friendship
+from .models import Friendship, UploadedFile
+from .permissions import IsAdmin, IsOwnerOrAdmin
 from collections import Counter
 import datetime
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 
 User = get_user_model()
+
 
 @extend_schema(tags=['Auth'], summary='Реєстрація нового користувача')
 class RegisterAPIView(generics.CreateAPIView):
     queryset= User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
+
 
 @extend_schema(tags=['Users'], summary='Перегляд та редагування профілю')
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
@@ -54,6 +62,33 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         print("REDIS: User profile cache invalidated.")
         return response
 
+
+@extend_schema(
+    tags=['Auth'],
+    summary='Вихід із системи (відкликання refresh-токена)',
+    request=inline_serializer(
+        name='LogoutRequest',
+        fields={
+            'refresh': serializers.CharField(required=True, help_text='Refresh токен для додавання в чорний список'),
+        }
+    ),
+    responses={204: None}
+)
+class LogoutAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request): 
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'error': 'Refresh token not found'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except TokenError:
+            return Response({'error': 'Invalid or already revoked token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 @extend_schema(tags=['Users'], summary='Пошук користувачів')
 class UserSearchAPIView(generics.ListAPIView):
     serializer_class = PublicUserSerializer
@@ -64,6 +99,65 @@ class UserSearchAPIView(generics.ListAPIView):
         if query:
             return User.objects.filter(username__icontains=query).exclude(id=self.request.user.id)[:10]
         return User.objects.none()  
+
+
+@extend_schema(tags=['Users'], summary='Зміна ролі користувача (лише ADMIN)')
+class UserRoleUpdateAPIView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserRoleUpdateSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    lookup_field = 'id'
+    lookup_url_kwarg = 'user_id'
+    http_method_names = ['patch']
+
+
+@extend_schema(
+    tags=['Files'],
+    summary='Завантаження файлу (JPG, PNG, GIF, PDF до 5 МБ)',
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'file': {'type': 'string', 'format': 'binary'},
+            },
+            'required': ['file'],
+        }
+    },
+    responses={201: UploadedFileSerializer},
+)
+class FileUploadAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = UploadedFileSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        file_obj = serializer.save()
+        return Response(
+            {'message': 'File uploaded successfully', 'file': UploadedFileSerializer(file_obj).data},
+            status=status.HTTP_201_CREATED
+        )
+
+@extend_schema(tags=['Files'], summary='Отримання або видалення файлу за ID')
+class FileDetailAPIView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), IsOwnerOrAdmin()]
+        return [AllowAny]
+
+    def get(self, request, file_id):
+        file_obj = get_object_or_404(UploadedFile, id=file_id)
+        if not file_obj.file or not file_obj.file.storage.exists(file_obj.file.name):
+            return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
+        return FileResponse(file_obj.file.open('rb'), content_type=file_obj.mimetype)
+
+    def delete(self, request, file_id):
+        file_obj = get_object_or_404(UploadedFile, id=file_id)
+        self.check_object_permissions(request, file_obj)
+        file_obj.file.delete(save=False)
+        file_obj.delete()
+        return Response({'message': 'File successfully deleted'}, status=status.HTTP_200_OK)
+
 
 @extend_schema(tags=['Users'], summary='Підписатися/відписатися на користувача')
 class ToggleFriendshipAPIView(APIView):
@@ -84,6 +178,7 @@ class ToggleFriendshipAPIView(APIView):
             Friendship.objects.create(follower=request.user, following=user_to_follow)
             return Response({"status": "followed"}, status=status.HTTP_201_CREATED)
 
+
 @extend_schema(tags=['Users'], summary='Список друзів')
 class FollowedUserAPIView(generics.ListAPIView):
     serializer_class = PublicUserSerializer
@@ -92,6 +187,7 @@ class FollowedUserAPIView(generics.ListAPIView):
     def get_queryset(self):
         followed_user_ids = Friendship.objects.filter(follower=self.request.user).values_list('following_id', flat=True)
         return User.objects.filter(id__in=followed_user_ids)
+
 
 @extend_schema(tags=['Users'], summary='Профіль іншого користувача')
 class UserDetailAPIView(generics.RetrieveAPIView):

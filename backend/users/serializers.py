@@ -1,11 +1,12 @@
-from .models import Friendship
+from .models import Friendship, UploadedFile
+from .validators import validate_uploaded_file
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
         model  = User
@@ -26,10 +27,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'avatar', 'year_joined')
-        read_only_fields = ('username', 'email', 'year_joined')
+        fields = ('id', 'username', 'email', 'role', 'avatar', 'year_joined')
+        read_only_fields = ('username', 'role', 'email', 'year_joined')
 
-    def get_year_joined(self, obj):
+    def get_year_joined(self, obj) -> int:
         return obj.date_joined.year
 
     def validate_avatar(self, value):
@@ -38,12 +39,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("The photo size must not exceed 2 MB.")
         return value
 
+class UserRoleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'role')
+        read_only_fields = ('id', 'username')
 
 class PublicUserSerializer(serializers.ModelSerializer):
     is_following = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ('id', 'username', 'avatar', 'is_following')
+        fields = ('id', 'username', 'role', 'avatar', 'is_following')
 
     def get_is_following(self, obj):
         request = self.context.get('request')
@@ -51,8 +57,25 @@ class PublicUserSerializer(serializers.ModelSerializer):
             return Friendship.objects.filter(follower=request.user, following=obj).exists()
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    following_user = PublicUserSerializer(source='folowing', read_only=True)
+    following_user = PublicUserSerializer(source='following', read_only=True)
     class Meta:
         model = Friendship
         fields = ('id', 'following', 'following_user', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+class UploadedFileSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(validators=[validate_uploaded_file])
+    class Meta:
+        model = UploadedFile
+        fields = ('id', 'file', 'original_name', 'mimetype', 'size', 'uploaded_by', 'created_at')
+        read_only_fields = ('id', 'original_name', 'mimetype', 'size', 'uploaded_by', 'created_at')
+
+    def create(self, validated_data):
+        uploaded = validated_data['file']
+        return UploadedFile.objects.create(
+            file=uploaded,
+            original_name=uploaded.name,
+            mimetype=uploaded.content_type or 'application/octet-stream',
+            size=uploaded.size,
+            uploaded_by=self.context['request'].user,
+        )

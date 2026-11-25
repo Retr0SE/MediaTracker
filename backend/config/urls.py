@@ -4,6 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from users.views import FileUploadAPIView, FileDetailAPIView
+
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
@@ -15,6 +17,10 @@ urlpatterns = [
     
     path('api/token/', extend_schema_view(post=extend_schema(tags=['Auth'], summary='Отримати JWT-токени'))(TokenObtainPairView).as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', extend_schema_view(post=extend_schema(tags=['Auth'], summary='Оновити access-токен'))(TokenRefreshView).as_view(), name='token_refresh'),
+    
+    path('api/files/upload/', FileUploadAPIView.as_view(), name='file-upload'),
+    path('api/files/<int:file_id>/', FileDetailAPIView.as_view(), name='file-detail'),
+
     
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger_ui'),
